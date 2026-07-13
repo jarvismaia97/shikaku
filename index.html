@@ -296,6 +296,32 @@ footer {
   cursor: pointer;
 }
 .menu-levels-btn:active { opacity: 0.65; }
+.menu-train-btn {
+  background: #ffd6e0;
+  color: #b03060;
+  border: 1.5px solid #ffb3c6;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.menu-train-btn:active { opacity: 0.65; }
+
+/* Training badge */
+.train-badge {
+  display: none;
+  background: #ffd6e0;
+  color: #b03060;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1.5px solid #ffb3c6;
+}
+.train-badge.show { display: inline-block; }
 </style>
 </head>
 <body>
@@ -322,6 +348,7 @@ footer {
   <div class="menu-btns">
     <button class="menu-play" onclick="startGame()">Jogar →</button>
     <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
+    <button class="menu-train-btn" onclick="startTraining()">🎓 Modo Treino</button>
   </div>
 </div>
 
@@ -329,6 +356,7 @@ footer {
   <div class="hdr-left">
     <button class="menu-btn" onclick="openLevels()">☰</button>
     <h1>Shikaku</h1>
+    <span class="train-badge" id="train-badge">Treino</span>
   </div>
   <div class="hdr-right">
     <div class="level-num">Level <span id="lvl-n">1</span></div>
@@ -477,12 +505,20 @@ let onRect = -1;
 let colorN = 0;
 const solved = new Set();
 let hints  = 3;
+let trainingMode = false;
 
 function updateHintBtn() {
-  document.getElementById('hint-label').textContent = `Hint · ${hints}`;
-  const btn = document.getElementById('btn-hint');
-  btn.disabled = hints <= 0;
-  btn.style.opacity = hints <= 0 ? '0.4' : '';
+  if (trainingMode) {
+    document.getElementById('hint-label').textContent = 'Hint · ∞';
+    const btn = document.getElementById('btn-hint');
+    btn.disabled = false;
+    btn.style.opacity = '';
+  } else {
+    document.getElementById('hint-label').textContent = `Hint · ${hints}`;
+    const btn = document.getElementById('btn-hint');
+    btn.disabled = hints <= 0;
+    btn.style.opacity = hints <= 0 ? '0.4' : '';
+  }
 }
 let cellEls  = [];
 
@@ -683,29 +719,28 @@ function doClear() {
 }
 
 function doHint() {
-  if (hints <= 0) return;
+  if (!trainingMode && hints <= 0) return;
   const avail = lvl.solution.filter(sol => {
     const s = { r1: sol.r1, c1: sol.c1, r2: sol.r2, c2: sol.c2 };
     return !placed.some(p => rectsOverlap(s, p));
   });
   if (!avail.length) return;
-  hints--;
-  updateHintBtn();
+  if (!trainingMode) { hints--; updateHintBtn(); }
   const pick = avail[Math.floor(Math.random() * avail.length)];
   placed.push({ r1: pick.r1, c1: pick.c1, r2: pick.r2, c2: pick.c2, ci: colorN++ });
   updateCells();
-  if (checkWin()) {
-    markWin();
-  }
+  if (checkWin()) { markWin(); }
 }
 
 function markWin() {
   const isNew = !solved.has(curLvl);
-  solved.add(curLvl);
-  if (isNew) { hints++; updateHintBtn(); }
+  if (!trainingMode) {
+    solved.add(curLvl);
+    if (isNew) { hints++; updateHintBtn(); }
+  }
   updateLevelPicker();
   document.getElementById('btn-next').classList.add('show');
-  setTimeout(() => showWin(isNew), 350);
+  setTimeout(() => showWin(isNew && !trainingMode), 350);
 }
 
 // ─── Level loading ────────────────────────────────────────────────────────────
@@ -810,12 +845,26 @@ function closeIfBg(e, id) {
 
 // ─── Menu ─────────────────────────────────────────────────────────────────────
 function startGame() {
+  trainingMode = false;
+  document.getElementById('train-badge').classList.remove('show');
   document.getElementById('menu-screen').classList.add('hidden');
+  updateHintBtn();
 }
 
 function startAndLevels() {
+  trainingMode = false;
+  document.getElementById('train-badge').classList.remove('show');
   document.getElementById('menu-screen').classList.add('hidden');
+  updateHintBtn();
   openLevels();
+}
+
+function startTraining() {
+  trainingMode = true;
+  document.getElementById('train-badge').classList.add('show');
+  document.getElementById('menu-screen').classList.add('hidden');
+  loadLvl(0);
+  updateHintBtn();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
