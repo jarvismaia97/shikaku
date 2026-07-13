@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Shikaku</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f2ede8;
+  --surface: #ffffff;
+  --grid-sep: #cfc8c0;
+  --text: #1a1a1a;
+  --sub: #999;
+  --accent: #2c2c2c;
+}
+body {
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+header {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 10px;
+}
+.hdr-left { display: flex; align-items: center; gap: 8px; }
+.menu-btn {
+  background: none; border: none; font-size: 20px; cursor: pointer;
+  color: var(--text); padding: 4px; line-height: 1;
+}
+h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+.hdr-right { text-align: right; }
+.level-num { font-size: 16px; font-weight: 700; }
+.level-diff { font-size: 12px; color: var(--sub); }
+
+#grid-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  width: 100%;
+  max-width: 480px;
+}
+#grid {
+  background: var(--grid-sep);
+  border-radius: 10px;
+  border: 2px solid var(--grid-sep);
+  overflow: hidden;
+  display: grid;
+  gap: 2px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  width: min(calc(100vw - 40px), 440px);
+  height: min(calc(100vw - 40px), 440px);
+}
+.cell {
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  cursor: crosshair;
+  position: relative;
+  color: var(--text);
+  transition: background 0.08s;
+}
+.cell.preview { background: rgba(80, 100, 220, 0.13); }
+.cell.preview-bad { background: rgba(220, 60, 60, 0.15); }
+.cell.r-placed { background: var(--rc, #e0e0e0); }
+.cell.r-correct { background: var(--rc, #c8e6c9); }
+
+/* Rectangle borders */
+.cell.bt { border-top:    2.5px solid var(--rb, #444); }
+.cell.bb { border-bottom: 2.5px solid var(--rb, #444); }
+.cell.bl { border-left:   2.5px solid var(--rb, #444); }
+.cell.br { border-right:  2.5px solid var(--rb, #444); }
+
+/* Preview borders */
+.cell.pbt { border-top:    2px dashed rgba(60,80,200,.5); }
+.cell.pbb { border-bottom: 2px dashed rgba(60,80,200,.5); }
+.cell.pbl { border-left:   2px dashed rgba(60,80,200,.5); }
+.cell.pbr { border-right:  2px dashed rgba(60,80,200,.5); }
+
+footer {
+  width: 100%;
+  max-width: 480px;
+  padding: 8px 16px max(env(safe-area-inset-bottom, 0px), 20px);
+}
+.btn-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.btn {
+  background: var(--surface);
+  border: 1.5px solid #e0d8d0;
+  border-radius: 12px;
+  padding: 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  letter-spacing: 0.2px;
+}
+.btn:active { opacity: 0.65; }
+.btn .icon { font-size: 19px; line-height: 1; }
+.btn-wide {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: none;
+}
+.btn-wide.show { display: block; }
+.btn-wide:active { opacity: 0.8; }
+
+/* Overlays */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+}
+.overlay.show { display: flex; }
+.sheet {
+  background: var(--bg);
+  border-radius: 22px 22px 0 0;
+  padding: 10px 20px max(env(safe-area-inset-bottom, 0px), 32px);
+  width: 100%;
+  max-width: 480px;
+}
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: #ccc; border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.sheet h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.sheet .sub { color: var(--sub); font-size: 14px; margin-bottom: 20px; }
+
+/* Win sheet */
+.win-emoji { font-size: 52px; text-align: center; margin-bottom: 12px; }
+.win-actions { display: flex; gap: 10px; }
+.win-actions .btn-wide { display: block; flex: 1; }
+.win-actions .btn-secondary {
+  flex: 0 0 auto;
+  background: #e8e0d8;
+  color: var(--text);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Level picker */
+.level-sheet {
+  max-height: 72vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.diff-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--sub);
+  margin: 12px 0 6px;
+}
+.diff-label:first-child { margin-top: 0; }
+.lvl-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 5px;
+  margin-bottom: 4px;
+}
+.lvl-btn {
+  aspect-ratio: 1;
+  background: var(--surface);
+  border: 1.5px solid #e0d8d0;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.lvl-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.lvl-btn.done { background: #e8f5e9; border-color: #a5d6a7; color: #2e7d32; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-left">
+    <button class="menu-btn" onclick="openLevels()">☰</button>
+    <h1>Shikaku</h1>
+  </div>
+  <div class="hdr-right">
+    <div class="level-num">Level <span id="lvl-n">1</span></div>
+    <div class="level-diff" id="lvl-diff">Easy · 5×5</div>
+  </div>
+</header>
+
+<div id="grid-wrap"><div id="grid"></div></div>
+
+<footer>
+  <div class="btn-row">
+    <button class="btn" onclick="doUndo()"><span class="icon">↩</span>Undo</button>
+    <button class="btn" onclick="doClear()"><span class="icon">✕</span>Clear</button>
+    <button class="btn" onclick="doHint()"><span class="icon">💡</span>Hint</button>
+    <button class="btn" onclick="openLevels()"><span class="icon">⊞</span>Levels</button>
+  </div>
+  <button class="btn-wide" id="btn-next" onclick="nextLvl()">Next Level →</button>
+</footer>
+
+<!-- Win sheet -->
+<div class="overlay" id="win-overlay" onclick="closeIfBg(event,'win-overlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="win-emoji">🎉</div>
+    <h2 style="text-align:center">Puzzle Solved!</h2>
+    <p class="sub" id="win-sub" style="text-align:center">Level 1 · Easy</p>
+    <div class="win-actions">
+      <button class="btn-secondary" onclick="closeOverlay('win-overlay')">Review</button>
+      <button class="btn-wide" onclick="nextLvlFromWin()">Next Level →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Level picker -->
+<div class="overlay" id="lvl-overlay" onclick="closeIfBg(event,'lvl-overlay')">
+  <div class="sheet level-sheet" id="lvl-sheet">
+    <div class="sheet-handle"></div>
+    <div id="lvl-picker-content"></div>
+  </div>
+</div>
+
+<script>
+// ─── Seeded RNG ───────────────────────────────────────────────────────────────
+class RNG {
+  constructor(seed) { this.s = (seed ^ 0xdeadbeef) >>> 0; }
+  next() {
+    let s = this.s;
+    s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+    this.s = s >>> 0;
+    return (s >>> 0) / 0x100000000;
+  }
+  int(a, b) { return a + Math.floor(this.next() * (b - a + 1)); }
+}
+
+// ─── Level generator (recursive partition) ────────────────────────────────────
+function genLevel(seed, size, maxArea) {
+  const rng = new RNG(seed);
+  const rects = [];
+
+  function place(r1, c1, r2, c2) {
+    const area = (r2-r1)*(c2-c1);
+    const canH = r2-r1 >= 2, canV = c2-c1 >= 2;
+
+    if (area <= maxArea) {
+      const keep = area <= 2 ? 0.88 : area <= 4 ? 0.70 : 0.50;
+      if (rng.next() < keep || (!canH && !canV)) {
+        rects.push({
+          r1, c1, r2, c2, area,
+          cr: rng.int(r1, r2-1),
+          cc: rng.int(c1, c2-1)
+        });
+        return;
+      }
+    }
+
+    if (canH && (!canV || rng.next() < 0.5)) {
+      const mid = rng.int(r1+1, r2-1);
+      place(r1, c1, mid, c2); place(mid, c1, r2, c2);
+    } else if (canV) {
+      const mid = rng.int(c1+1, c2-1);
+      place(r1, c1, r2, mid); place(r1, mid, r2, c2);
+    } else {
+      rects.push({ r1, c1, r2: r1+1, c2: c1+1, area: 1, cr: r1, cc: c1 });
+    }
+  }
+
+  place(0, 0, size, size);
+
+  const clues = rects.map(r => ({ r: r.cr, c: r.cc, v: r.area }));
+  return { size, clues, solution: rects };
+}
+
+// ─── Level config ─────────────────────────────────────────────────────────────
+const DIFFS = [
+  { label: 'Easy',   size: 5,  maxArea: 8,  count: 15 },
+  { label: 'Easy',   size: 6,  maxArea: 9,  count: 15 },
+  { label: 'Medium', size: 7,  maxArea: 9,  count: 20 },
+  { label: 'Hard',   size: 8,  maxArea: 8,  count: 20 },
+  { label: 'Hard',   size: 9,  maxArea: 8,  count: 15 },
+  { label: 'Expert', size: 10, maxArea: 8,  count: 15 },
+];
+
+// Build level metadata array (0-indexed)
+const LEVEL_META = [];
+DIFFS.forEach(d => {
+  for (let i = 0; i < d.count; i++)
+    LEVEL_META.push({ label: d.label, size: d.size, maxArea: d.maxArea });
+});
+
+// Generate all 100 levels lazily
+const LEVEL_CACHE = {};
+function getLevel(idx) {
+  if (!LEVEL_CACHE[idx]) {
+    const m = LEVEL_META[idx];
+    LEVEL_CACHE[idx] = genLevel(idx * 1031 + 7, m.size, m.maxArea);
+  }
+  return LEVEL_CACHE[idx];
+}
+
+// ─── Color palette ────────────────────────────────────────────────────────────
+const BG_PAL = [
+  '#ffd6d6','#fde8c4','#fef9c3','#d4edda','#d0e8f9','#e8d5f9',
+  '#ffd9b0','#c8f0e4','#d8d2f8','#f9d0e4','#e8f2c8','#c8eaf8',
+  '#f8dac8','#d4f4d8','#e4daf8','#f4eac8','#ccf8d8','#d8eaff',
+  '#ffe8d0','#d8ffec',
+];
+const BD_PAL = [
+  '#c55','#c77','#886','#277','#278','#729',
+  '#c60','#277','#349','#838','#373','#049',
+  '#a44','#464','#449','#664','#484','#446',
+  '#b42','#459',
+];
+
+// ─── Game state ───────────────────────────────────────────────────────────────
+let curLvl = 0;
+let lvl    = null;
+let placed = [];
+let drawing = null;
+let pid    = null;
+let onRect = -1;
+let colorN = 0;
+const solved = new Set();
+let cellEls  = [];
+
+// ─── Grid rendering ───────────────────────────────────────────────────────────
+function renderGrid() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  cellEls = [];
+  const { size } = lvl;
+  g.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+  const fs = size >= 10 ? '11px' : size >= 9 ? '12px' : size >= 8 ? '13px' : size >= 7 ? '14px' : '17px';
+
+  for (let r = 0; r < size; r++) {
+    cellEls[r] = [];
+    for (let c = 0; c < size; c++) {
+      const div = document.createElement('div');
+      div.className = 'cell';
+      div.dataset.r = r;
+      div.dataset.c = c;
+      div.style.fontSize = fs;
+      const cl = clueAt(r, c);
+      if (cl) div.textContent = cl.v;
+      g.appendChild(div);
+      cellEls[r][c] = div;
+    }
+  }
+}
+
+function clueAt(r, c) {
+  return lvl.clues.find(cl => cl.r === r && cl.c === c) || null;
+}
+
+// ─── Update cell visuals ──────────────────────────────────────────────────────
+function updateCells() {
+  const { size } = lvl;
+  // Reset
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const el = cellEls[r][c];
+      const cl = clueAt(r, c);
+      el.className = 'cell';
+      el.textContent = cl ? cl.v : '';
+      el.style.removeProperty('--rc');
+      el.style.removeProperty('--rb');
+    }
+  }
+
+  // Placed rects
+  for (const rect of placed) {
+    const { r1, c1, r2, c2, ci } = rect;
+    const ok = rectOk(rect);
+    const cls = ok ? 'r-correct' : 'r-placed';
+    const bg = BG_PAL[ci % BG_PAL.length];
+    const bd = BD_PAL[ci % BD_PAL.length];
+    for (let r = r1; r < r2; r++) {
+      for (let c = c1; c < c2; c++) {
+        const el = cellEls[r][c];
+        el.classList.add(cls);
+        el.style.setProperty('--rc', bg);
+        el.style.setProperty('--rb', bd);
+        if (r === r1)   el.classList.add('bt');
+        if (r === r2-1) el.classList.add('bb');
+        if (c === c1)   el.classList.add('bl');
+        if (c === c2-1) el.classList.add('br');
+      }
+    }
+  }
+
+  // Preview
+  if (drawing) {
+    const p = previewCoords();
+    for (let r = p.r1; r < p.r2; r++) {
+      for (let c = p.c1; c < p.c2; c++) {
+        const el = cellEls[r][c];
+        const occupied = el.classList.contains('r-placed') || el.classList.contains('r-correct');
+        el.classList.add(occupied ? 'preview-bad' : 'preview');
+        if (r === p.r1)   el.classList.add('pbt');
+        if (r === p.r2-1) el.classList.add('pbb');
+        if (c === p.c1)   el.classList.add('pbl');
+        if (c === p.c2-1) el.classList.add('pbr');
+      }
+    }
+  }
+}
+
+function previewCoords() {
+  const { sr, sc, cr, cc } = drawing;
+  return {
+    r1: Math.min(sr, cr), c1: Math.min(sc, cc),
+    r2: Math.max(sr, cr)+1, c2: Math.max(sc, cc)+1,
+  };
+}
+
+// ─── Rect helpers ─────────────────────────────────────────────────────────────
+function rectOk(rect) {
+  const { r1, c1, r2, c2 } = rect;
+  const area = (r2-r1)*(c2-c1);
+  let n = 0, v = 0;
+  for (const cl of lvl.clues) {
+    if (cl.r >= r1 && cl.r < r2 && cl.c >= c1 && cl.c < c2) { n++; v = cl.v; }
+  }
+  return n === 1 && area === v;
+}
+
+function rectsOverlap(a, b) {
+  return !(a.r2 <= b.r1 || b.r2 <= a.r1 || a.c2 <= b.c1 || b.c2 <= a.c1);
+}
+
+function tryPlace(r1, c1, r2, c2) {
+  const nr = { r1, c1, r2, c2, ci: colorN++ };
+  for (const p of placed) if (rectsOverlap(nr, p)) return false;
+  placed.push(nr);
+  return true;
+}
+
+// ─── Win check ────────────────────────────────────────────────────────────────
+function checkWin() {
+  if (!placed.length) return false;
+  const { size } = lvl;
+  const cov = Array.from({length: size}, () => Array(size).fill(false));
+  for (const rect of placed) {
+    if (!rectOk(rect)) return false;
+    const { r1, c1, r2, c2 } = rect;
+    for (let r = r1; r < r2; r++)
+      for (let c = c1; c < c2; c++)
+        cov[r][c] = true;
+  }
+  for (let r = 0; r < size; r++)
+    for (let c = 0; c < size; c++)
+      if (!cov[r][c]) return false;
+  return true;
+}
+
+// ─── Pointer events ───────────────────────────────────────────────────────────
+function posFromEvent(e) {
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  if (!el || !el.dataset.r) return null;
+  return { r: +el.dataset.r, c: +el.dataset.c };
+}
+
+document.getElementById('grid').addEventListener('pointerdown', e => {
+  e.preventDefault();
+  const pos = posFromEvent(e);
+  if (!pos) return;
+  onRect = placed.findIndex(rect =>
+    pos.r >= rect.r1 && pos.r < rect.r2 && pos.c >= rect.c1 && pos.c < rect.c2
+  );
+  pid = e.pointerId;
+  document.getElementById('grid').setPointerCapture(e.pointerId);
+  drawing = { sr: pos.r, sc: pos.c, cr: pos.r, cc: pos.c };
+  updateCells();
+});
+
+document.getElementById('grid').addEventListener('pointermove', e => {
+  if (!drawing || e.pointerId !== pid) return;
+  e.preventDefault();
+  const pos = posFromEvent(e);
+  if (!pos || (pos.r === drawing.cr && pos.c === drawing.cc)) return;
+  drawing.cr = pos.r; drawing.cc = pos.c;
+  updateCells();
+});
+
+document.getElementById('grid').addEventListener('pointerup', e => {
+  if (!drawing || e.pointerId !== pid) return;
+  e.preventDefault();
+  const p = previewCoords();
+  const isTap = p.r2-p.r1 === 1 && p.c2-p.c1 === 1;
+
+  if (isTap && onRect >= 0) {
+    placed.splice(onRect, 1);
+  } else {
+    tryPlace(p.r1, p.c1, p.r2, p.c2);
+  }
+
+  drawing = null; pid = null; onRect = -1;
+  updateCells();
+
+  if (checkWin()) {
+    solved.add(curLvl);
+    updateLevelPicker();
+    document.getElementById('btn-next').classList.add('show');
+    setTimeout(showWin, 350);
+  }
+});
+
+document.getElementById('grid').addEventListener('pointercancel', () => {
+  drawing = null; pid = null; onRect = -1;
+  updateCells();
+});
+
+// ─── Controls ─────────────────────────────────────────────────────────────────
+function doUndo() {
+  placed.pop();
+  updateCells();
+}
+
+function doClear() {
+  placed = []; colorN = 0;
+  updateCells();
+}
+
+function doHint() {
+  const avail = lvl.solution.filter(sol => {
+    const s = { r1: sol.r1, c1: sol.c1, r2: sol.r2, c2: sol.c2 };
+    return !placed.some(p => rectsOverlap(s, p));
+  });
+  if (!avail.length) return;
+  const pick = avail[Math.floor(Math.random() * avail.length)];
+  placed.push({ r1: pick.r1, c1: pick.c1, r2: pick.r2, c2: pick.c2, ci: colorN++ });
+  updateCells();
+  if (checkWin()) {
+    solved.add(curLvl);
+    updateLevelPicker();
+    document.getElementById('btn-next').classList.add('show');
+    setTimeout(showWin, 350);
+  }
+}
+
+// ─── Level loading ────────────────────────────────────────────────────────────
+function loadLvl(idx) {
+  curLvl = idx;
+  lvl = getLevel(idx);
+  placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
+  const m = LEVEL_META[idx];
+  document.getElementById('lvl-n').textContent = idx + 1;
+  document.getElementById('lvl-diff').textContent = `${m.label} · ${m.size}×${m.size}`;
+  document.getElementById('btn-next').classList.remove('show');
+  renderGrid();
+  updateCells();
+  closeOverlay('lvl-overlay');
+}
+
+function nextLvl() {
+  if (curLvl < 99) loadLvl(curLvl + 1);
+}
+
+function nextLvlFromWin() {
+  closeOverlay('win-overlay');
+  nextLvl();
+}
+
+// ─── Win overlay ──────────────────────────────────────────────────────────────
+function showWin() {
+  const m = LEVEL_META[curLvl];
+  document.getElementById('win-sub').textContent = `Level ${curLvl+1} · ${m.label}`;
+  document.getElementById('win-overlay').classList.add('show');
+}
+
+// ─── Level picker ─────────────────────────────────────────────────────────────
+function openLevels() {
+  updateLevelPicker();
+  document.getElementById('lvl-overlay').classList.add('show');
+}
+
+function updateLevelPicker() {
+  const cont = document.getElementById('lvl-picker-content');
+  cont.innerHTML = '';
+
+  let lastLabel = '', startIdx = 0;
+  const groups = [];
+
+  LEVEL_META.forEach((m, i) => {
+    if (m.label !== lastLabel) {
+      if (lastLabel) groups[groups.length-1].end = i;
+      groups.push({ label: m.label, size: m.size, start: i });
+      lastLabel = m.label;
+    }
+  });
+  if (groups.length) groups[groups.length-1].end = 100;
+
+  // Merge consecutive same-label groups into sections
+  const sections = [];
+  for (const g of groups) {
+    if (sections.length && sections[sections.length-1].label === g.label) {
+      sections[sections.length-1].end = g.end;
+      sections[sections.length-1].size = g.size;
+    } else {
+      sections.push({...g});
+    }
+  }
+
+  // Rebuild sections cleanly
+  let idx = 0;
+  for (const d of DIFFS) {
+    const lbl = document.createElement('div');
+    lbl.className = 'diff-label';
+    lbl.textContent = `${d.label} — ${d.size}×${d.size} (${d.count} levels)`;
+    cont.appendChild(lbl);
+
+    const grid = document.createElement('div');
+    grid.className = 'lvl-grid';
+
+    for (let i = 0; i < d.count; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'lvl-btn';
+      if (idx === curLvl) btn.classList.add('active');
+      if (solved.has(idx)) btn.classList.add('done');
+      btn.textContent = idx + 1;
+      const ii = idx;
+      btn.onclick = () => loadLvl(ii);
+      grid.appendChild(btn);
+      idx++;
+    }
+    cont.appendChild(grid);
+  }
+}
+
+// ─── Overlay helpers ──────────────────────────────────────────────────────────
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function closeIfBg(e, id) {
+  if (e.target === document.getElementById(id)) closeOverlay(id);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadLvl(0);
+</script>
+</body>
+</html>
