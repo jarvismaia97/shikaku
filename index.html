@@ -233,7 +233,7 @@ footer {
   <div class="btn-row">
     <button class="btn" onclick="doUndo()"><span class="icon">↩</span>Undo</button>
     <button class="btn" onclick="doClear()"><span class="icon">✕</span>Clear</button>
-    <button class="btn" onclick="doHint()"><span class="icon">💡</span>Hint</button>
+    <button class="btn" id="btn-hint" onclick="doHint()"><span class="icon">💡</span><span id="hint-label">Hint · 3</span></button>
     <button class="btn" onclick="openLevels()"><span class="icon">⊞</span>Levels</button>
   </div>
   <button class="btn-wide" id="btn-next" onclick="nextLvl()">Next Level →</button>
@@ -246,6 +246,7 @@ footer {
     <div class="win-emoji">🎉</div>
     <h2 style="text-align:center">Puzzle Solved!</h2>
     <p class="sub" id="win-sub" style="text-align:center">Level 1 · Easy</p>
+    <div id="hint-reward" style="display:none;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;color:#9b7bb8;">💡 +1 Hint earned!</div>
     <div class="win-actions">
       <button class="btn-secondary" onclick="closeOverlay('win-overlay')">Review</button>
       <button class="btn-wide" onclick="nextLvlFromWin()">Next Level →</button>
@@ -366,6 +367,14 @@ let pid    = null;
 let onRect = -1;
 let colorN = 0;
 const solved = new Set();
+let hints  = 3;
+
+function updateHintBtn() {
+  document.getElementById('hint-label').textContent = `Hint · ${hints}`;
+  const btn = document.getElementById('btn-hint');
+  btn.disabled = hints <= 0;
+  btn.style.opacity = hints <= 0 ? '0.4' : '';
+}
 let cellEls  = [];
 
 // ─── Grid rendering ───────────────────────────────────────────────────────────
@@ -544,10 +553,7 @@ document.getElementById('grid').addEventListener('pointerup', e => {
   updateCells();
 
   if (checkWin()) {
-    solved.add(curLvl);
-    updateLevelPicker();
-    document.getElementById('btn-next').classList.add('show');
-    setTimeout(showWin, 350);
+    markWin();
   }
 });
 
@@ -568,20 +574,29 @@ function doClear() {
 }
 
 function doHint() {
+  if (hints <= 0) return;
   const avail = lvl.solution.filter(sol => {
     const s = { r1: sol.r1, c1: sol.c1, r2: sol.r2, c2: sol.c2 };
     return !placed.some(p => rectsOverlap(s, p));
   });
   if (!avail.length) return;
+  hints--;
+  updateHintBtn();
   const pick = avail[Math.floor(Math.random() * avail.length)];
   placed.push({ r1: pick.r1, c1: pick.c1, r2: pick.r2, c2: pick.c2, ci: colorN++ });
   updateCells();
   if (checkWin()) {
-    solved.add(curLvl);
-    updateLevelPicker();
-    document.getElementById('btn-next').classList.add('show');
-    setTimeout(showWin, 350);
+    markWin();
   }
+}
+
+function markWin() {
+  const isNew = !solved.has(curLvl);
+  solved.add(curLvl);
+  if (isNew) { hints++; updateHintBtn(); }
+  updateLevelPicker();
+  document.getElementById('btn-next').classList.add('show');
+  setTimeout(() => showWin(isNew), 350);
 }
 
 // ─── Level loading ────────────────────────────────────────────────────────────
@@ -608,9 +623,11 @@ function nextLvlFromWin() {
 }
 
 // ─── Win overlay ──────────────────────────────────────────────────────────────
-function showWin() {
+function showWin(earnedHint) {
   const m = LEVEL_META[curLvl];
   document.getElementById('win-sub').textContent = `Level ${curLvl+1} · ${m.label}`;
+  const reward = document.getElementById('hint-reward');
+  reward.style.display = earnedHint ? 'block' : 'none';
   document.getElementById('win-overlay').classList.add('show');
 }
 
@@ -684,6 +701,7 @@ function closeIfBg(e, id) {
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 loadLvl(0);
+updateHintBtn();
 </script>
 </body>
 </html>
