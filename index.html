@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Shikaku</title>
+<title>Bumi</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -356,7 +356,7 @@ footer {
 <!-- Menu screen -->
 <div id="menu-screen">
   <div class="menu-logo">🟪</div>
-  <div class="menu-title">Shikaku</div>
+  <div class="menu-title">Bumi</div>
   <p class="menu-sub">Divide a grelha em retângulos. Cada um contém exatamente um número.</p>
   <div class="menu-how">
     <div class="menu-how-item">
@@ -390,7 +390,7 @@ footer {
 <header>
   <div class="hdr-left">
     <button class="menu-btn" onclick="openLevels()">☰</button>
-    <h1>Shikaku</h1>
+    <h1>Bumi</h1>
     <span class="train-badge" id="train-badge">Treino</span>
   </div>
   <div class="hdr-right">
@@ -933,11 +933,11 @@ function setTheme(name, el) {
   for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
   document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
   if (el) el.classList.add('active');
-  localStorage.setItem('shikaku-theme', name);
+  localStorage.setItem('bumi-theme', name);
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-const savedTheme = localStorage.getItem('shikaku-theme') || 'pastel';
+const savedTheme = localStorage.getItem('bumi-theme') || 'pastel';
 const savedSwatch = document.querySelector(`[data-theme="${savedTheme}"]`);
 setTheme(savedTheme, savedSwatch);
 loadLvl(0);
