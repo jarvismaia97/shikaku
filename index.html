@@ -212,9 +212,118 @@ footer {
 }
 .lvl-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 .lvl-btn.done { background: #e8d5ff; border-color: #c4a0e8; color: #7040a0; }
+
+/* Menu screen */
+#menu-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  z-index: 200;
+  padding: 40px 32px max(env(safe-area-inset-bottom, 0px), 40px);
+}
+#menu-screen.hidden { display: none; }
+.menu-logo {
+  font-size: 56px;
+  margin-bottom: 8px;
+}
+.menu-title {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.menu-sub {
+  font-size: 15px;
+  color: var(--sub);
+  text-align: center;
+  margin-bottom: 48px;
+  line-height: 1.5;
+  max-width: 260px;
+}
+.menu-how {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 48px;
+  width: 100%;
+  max-width: 300px;
+}
+.menu-how-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 12px 16px;
+  border: 1.5px solid #e0d4e8;
+}
+.menu-how-icon { font-size: 22px; flex-shrink: 0; }
+.menu-how-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+.menu-how-text strong { font-weight: 700; }
+.menu-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+.menu-play {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 18px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+}
+.menu-play:active { opacity: 0.8; }
+.menu-levels-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1.5px solid #e0d4e8;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.menu-levels-btn:active { opacity: 0.65; }
 </style>
 </head>
 <body>
+
+<!-- Menu screen -->
+<div id="menu-screen">
+  <div class="menu-logo">🟪</div>
+  <div class="menu-title">Shikaku</div>
+  <p class="menu-sub">Divide a grelha em retângulos. Cada um contém exatamente um número.</p>
+  <div class="menu-how">
+    <div class="menu-how-item">
+      <span class="menu-how-icon">✏️</span>
+      <span class="menu-how-text"><strong>Desenha</strong> retângulos arrastando o dedo</span>
+    </div>
+    <div class="menu-how-item">
+      <span class="menu-how-icon">🔢</span>
+      <span class="menu-how-text"><strong>Cada número</strong> indica a área do retângulo</span>
+    </div>
+    <div class="menu-how-item">
+      <span class="menu-how-icon">💡</span>
+      <span class="menu-how-text"><strong>Completa níveis</strong> para ganhar hints</span>
+    </div>
+  </div>
+  <div class="menu-btns">
+    <button class="menu-play" onclick="startGame()">Jogar →</button>
+    <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
+  </div>
+</div>
 
 <header>
   <div class="hdr-left">
@@ -697,6 +806,16 @@ function closeOverlay(id) {
 
 function closeIfBg(e, id) {
   if (e.target === document.getElementById(id)) closeOverlay(id);
+}
+
+// ─── Menu ─────────────────────────────────────────────────────────────────────
+function startGame() {
+  document.getElementById('menu-screen').classList.add('hidden');
+}
+
+function startAndLevels() {
+  document.getElementById('menu-screen').classList.add('hidden');
+  openLevels();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
