@@ -685,12 +685,12 @@ const BG_PAL = [
   '#fff0a0',  // amarelo
 ];
 const BD_PAL = [
-  '#9b7bb8',  // lavanda
+  '#a878d0',  // lavanda
   '#5a9fd4',  // oceano
-  '#e07060',  // sunset
-  '#56a87a',  // floresta
-  '#e08898',  // rosa
-  '#c8a030',  // amarelo
+  '#d09060',  // sunset (warm, not red)
+  '#48a068',  // floresta
+  '#d07890',  // rosa
+  '#a88a20',  // amarelo
 ];
 
 // ─── Tutorial ─────────────────────────────────────────────────────────────────
@@ -868,10 +868,11 @@ function updateCells() {
         if (ok) {
           el.classList.add('r-correct');
           el.style.setProperty('--rc', bg);
+          el.style.setProperty('--rb', bd);
         } else {
           el.classList.add('r-placed');
+          el.style.setProperty('--rb', '#c8c0d0');
         }
-        el.style.setProperty('--rb', bd);
         if (r === r1)   el.classList.add('bt');
         if (r === r2-1) el.classList.add('bb');
         if (c === c1)   el.classList.add('bl');
