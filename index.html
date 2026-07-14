@@ -43,14 +43,13 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
 
 #grid-wrap {
   flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 12px 20px;
   width: 100%;
   max-width: 480px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
 }
 #grid {
   background: var(--grid-sep);
@@ -73,10 +72,6 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   position: relative;
   color: var(--text);
   transition: background 0.08s;
-  width: var(--cell-size, 44px);
-  height: var(--cell-size, 44px);
-  min-width: var(--cell-size, 44px);
-  min-height: var(--cell-size, 44px);
   overflow: hidden;
   border: 1px solid transparent;
 }
@@ -941,23 +936,50 @@ function updateHintBtn() {
 // also allow hints in daily mode (curLvl === -2 won't match curLvl===0 so hints work normally)
 let cellEls  = [];
 
+// ─── Grid sizing ──────────────────────────────────────────────────────────────
+function computeGridPx() {
+  const wrap = document.getElementById('grid-wrap');
+  const avW = wrap.clientWidth - 24;
+  let avH = wrap.clientHeight - 24;
+  if (avH < 80) {
+    const hdr = document.querySelector('header');
+    const ftr = document.querySelector('footer');
+    avH = window.innerHeight - (hdr ? hdr.offsetHeight : 56) - (ftr ? ftr.offsetHeight : 100) - 24;
+  }
+  return Math.min(avW, avH, 480);
+}
+
+function applyGridSize() {
+  if (!lvl) return;
+  const g = document.getElementById('grid');
+  const { size } = lvl;
+  const px = computeGridPx();
+  g.style.width  = px + 'px';
+  g.style.height = px + 'px';
+  g.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  g.style.gridTemplateRows    = `repeat(${size}, 1fr)`;
+  const cellPx = px / size;
+  const fs = cellPx >= 40 ? '17px' : cellPx >= 34 ? '14px' : cellPx >= 28 ? '12px' : '10px';
+  for (let r = 0; r < size; r++)
+    for (let c = 0; c < size; c++)
+      if (cellEls[r] && cellEls[r][c]) cellEls[r][c].style.fontSize = fs;
+}
+
 // ─── Grid rendering ───────────────────────────────────────────────────────────
 function renderGrid() {
   const g = document.getElementById('grid');
-  const wrap = document.getElementById('grid-wrap');
   g.innerHTML = '';
   cellEls = [];
   const { size } = lvl;
 
-  // Fixed cell size: fill available space but never smaller than 32px
-  const available = Math.min(wrap.clientWidth - 24, wrap.clientHeight - 24, 440);
-  const cellPx = Math.max(32, Math.floor((available - size - 2) / size));
-  document.documentElement.style.setProperty('--cell-size', cellPx + 'px');
+  const px = computeGridPx();
+  g.style.width  = px + 'px';
+  g.style.height = px + 'px';
+  g.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  g.style.gridTemplateRows    = `repeat(${size}, 1fr)`;
 
-  g.style.gridTemplateColumns = `repeat(${size}, var(--cell-size, 44px))`;
-  g.style.gridTemplateRows    = `repeat(${size}, var(--cell-size, 44px))`;
-
-  const fs = cellPx >= 40 ? '17px' : cellPx >= 36 ? '14px' : cellPx >= 32 ? '12px' : '11px';
+  const cellPx = px / size;
+  const fs = cellPx >= 40 ? '17px' : cellPx >= 34 ? '14px' : cellPx >= 28 ? '12px' : '10px';
 
   for (let r = 0; r < size; r++) {
     cellEls[r] = [];
@@ -1500,6 +1522,9 @@ function setTheme(name, el) {
   if (el) el.classList.add('active');
   localStorage.setItem('bumi-theme', name);
 }
+
+// ─── Resize handler ───────────────────────────────────────────────────────────
+window.addEventListener('resize', applyGridSize);
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 const savedTheme = localStorage.getItem('bumi-theme') || 'pastel';
