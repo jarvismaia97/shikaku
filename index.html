@@ -93,10 +93,26 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
 .cell.r-correct::after {
   content: '';
   position: absolute;
-  inset: -1px;        /* bleed 1px in every direction to cover the gap */
+  inset: -1px;
   background: var(--rc, #e8d5ff);
-  z-index: -1;        /* behind the number text, above the grid background */
+  background-image: var(--rp, none);
+  z-index: -1;
 }
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+@keyframes rectPop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.07); }
+  65%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+.cell.r-correct.r-pop { animation: rectPop 0.28s cubic-bezier(.36,.07,.19,.97); z-index: 1; }
+
+@keyframes undoFade {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.88); }
+}
+.cell.r-undo { pointer-events: none; animation: undoFade 0.18s ease-in forwards; }
 
 /* Rectangle borders */
 .cell.bt { border-top:    2.5px solid var(--rb, #444); }
@@ -614,6 +630,26 @@ footer {
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
+.theme-swatch.cb-swatch {
+  font-size: 9px; font-weight: 800; color: var(--text);
+  background: var(--surface); display: flex; align-items: center; justify-content: center;
+}
+.theme-swatch.cb-swatch.active { background: var(--accent); color: #fff; }
+
+/* Infinite mode */
+.menu-infinite-btn {
+  background: linear-gradient(135deg, #e8d5ff, #b5d5f5);
+  color: var(--text); border: 1.5px solid #c0a8e8; border-radius: 16px;
+  padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.menu-infinite-btn:active { opacity: 0.65; }
+.infinite-badge {
+  display: none; background: linear-gradient(135deg,#e8d5ff,#b5d5f5);
+  color: #6040a0; font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+  border: 1.5px solid #c0a8e8;
+}
+.infinite-badge.show { display: inline-block; }
 </style>
 </head>
 <body>
@@ -640,11 +676,13 @@ footer {
     <button class="theme-swatch" style="background:#e07060" data-theme="sunset" onclick="setTheme('sunset',this)" title="Sunset"></button>
     <button class="theme-swatch" style="background:#56a87a" data-theme="forest" onclick="setTheme('forest',this)" title="Floresta"></button>
     <button class="theme-swatch" style="background:#4a4a6a" data-theme="dark" onclick="setTheme('dark',this)" title="Escuro"></button>
+    <button class="theme-swatch cb-swatch" id="cb-swatch" onclick="toggleColorblind(this)" title="Daltónico">CB</button>
   </div>
   <div class="menu-btns">
     <button class="menu-daily-btn" id="daily-menu-btn" onclick="startDaily()">☀️ Desafio Diário</button>
     <button class="menu-play" onclick="startGame()">Jogar →</button>
     <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
+    <button class="menu-infinite-btn" onclick="startInfinite()">∞ Modo Infinito</button>
     <button class="menu-train-btn" onclick="startTraining()">Modo Treino</button>
   </div>
 </div>
@@ -656,6 +694,7 @@ footer {
     <h1>Bumi 🌴</h1>
     <span class="train-badge" id="train-badge">Treino</span>
     <span class="daily-badge" id="daily-badge">Diário</span>
+    <span class="infinite-badge" id="infinite-badge">Infinito</span>
   </div>
   <div class="hdr-right">
     <div class="level-num">Level <span id="lvl-n">1</span></div>
@@ -842,6 +881,30 @@ const BD_PAL = [
   '#a88a20',  // amarelo
 ];
 
+// ─── Colorblind palette + patterns ───────────────────────────────────────────
+const BG_PAL_CB = [
+  '#F5C842','#4DB3E6','#52B788','#E07C5A','#A06BBF','#88C0A0','#D4885A','#6090D0',
+  '#C8A030','#2090C0','#308870','#C05040','#7050A0','#508870','#B06830','#4070B0',
+];
+const BD_PAL_CB = [
+  '#B09010','#1070A0','#206850','#A03020','#503080','#306050','#904810','#204890',
+  '#A07010','#107090','#105040','#802010','#302060','#205040','#703010','#103070',
+];
+const PATTERNS = [
+  'repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0,rgba(0,0,0,.13) 2px,transparent 2px,transparent 7px)',
+  'repeating-linear-gradient(90deg,rgba(0,0,0,.13) 0,rgba(0,0,0,.13) 2px,transparent 2px,transparent 7px)',
+  'repeating-linear-gradient(45deg,rgba(0,0,0,.13) 0,rgba(0,0,0,.13) 2px,transparent 2px,transparent 8px)',
+  'repeating-linear-gradient(-45deg,rgba(0,0,0,.13) 0,rgba(0,0,0,.13) 2px,transparent 2px,transparent 8px)',
+  'radial-gradient(circle,rgba(0,0,0,.16) 1.5px,transparent 1.5px) 0 0/7px 7px',
+  'repeating-linear-gradient(45deg,rgba(0,0,0,.1) 0,rgba(0,0,0,.1) 2px,transparent 2px,transparent 5px),repeating-linear-gradient(-45deg,rgba(0,0,0,.1) 0,rgba(0,0,0,.1) 2px,transparent 2px,transparent 5px)',
+  'repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0,rgba(0,0,0,.13) 4px,transparent 4px,transparent 10px)',
+  'none',
+];
+let colorblindMode = JSON.parse(localStorage.getItem('bumi-cb') || 'false');
+
+// ─── Haptic ───────────────────────────────────────────────────────────────────
+function haptic(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
 // ─── Tutorial ─────────────────────────────────────────────────────────────────
 const TUTORIAL_LEVEL = {
   size: 3,
@@ -933,6 +996,8 @@ let colorN = 0;
 const solved = new Set();
 let hints  = 3;
 let trainingMode = false;
+let infiniteMode  = false;
+let infiniteCount = 0;
 
 function updateHintBtn() {
   const btn = document.getElementById('btn-hint');
@@ -1031,25 +1096,28 @@ function updateCells() {
       el.textContent = cl ? cl.v : '';
       el.style.removeProperty('--rc');
       el.style.removeProperty('--rb');
+      el.style.removeProperty('--rp');
     }
   }
 
   // Placed rects
+  const pal   = colorblindMode ? BG_PAL_CB : BG_PAL;
+  const bdpal = colorblindMode ? BD_PAL_CB : BD_PAL;
   for (const rect of placed) {
     const { r1, c1, r2, c2, ci } = rect;
     const ok = rectOk(rect);
-    const bg = BG_PAL[ci % BG_PAL.length];
-    const bd = BD_PAL[ci % BD_PAL.length];
+    const bg = pal[ci % pal.length];
+    const bd = bdpal[ci % bdpal.length];
     for (let r = r1; r < r2; r++) {
       for (let c = c1; c < c2; c++) {
         const el = cellEls[r][c];
         if (ok) {
           el.classList.add('r-correct');
           el.style.setProperty('--rc', bg);
-          // no borders — ::after fills seamlessly including the 1px gaps
+          if (colorblindMode) el.style.setProperty('--rp', PATTERNS[ci % PATTERNS.length]);
         } else {
           el.classList.add('r-placed');
-          el.style.setProperty('--rb', '#c8c0d0');
+          el.style.setProperty('--rb', bd);
           if (r === r1)   el.classList.add('bt');
           if (r === r2-1) el.classList.add('bb');
           if (c === c1)   el.classList.add('bl');
@@ -1162,7 +1230,15 @@ document.getElementById('grid').addEventListener('pointerup', e => {
   if (isTap && onRect >= 0) {
     placed.splice(onRect, 1);
   } else {
+    const prevLen = placed.length;
     tryPlace(p.r1, p.c1, p.r2, p.c2);
+    if (placed.length > prevLen) {
+      const newRect = placed[placed.length - 1];
+      if (rectOk(newRect)) {
+        haptic(40);
+        setTimeout(() => animateCorrectRect(newRect), 10);
+      }
+    }
   }
 
   drawing = null; pid = null; onRect = -1;
@@ -1180,8 +1256,21 @@ document.getElementById('grid').addEventListener('pointercancel', () => {
 
 // ─── Controls ─────────────────────────────────────────────────────────────────
 function doUndo() {
-  placed.pop();
-  updateCells();
+  if (!placed.length) return;
+  haptic(20);
+  const last = placed[placed.length - 1];
+  const { r1, c1, r2, c2 } = last;
+  const cells = [];
+  for (let r = r1; r < r2; r++)
+    for (let c = c1; c < c2; c++) {
+      const el = document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+      if (el) { el.classList.add('r-undo'); cells.push(el); }
+    }
+  setTimeout(() => {
+    cells.forEach(el => el.classList.remove('r-undo'));
+    placed.pop();
+    updateCells();
+  }, 180);
 }
 
 function doClear() {
@@ -1204,8 +1293,14 @@ function doHint() {
 }
 
 function markWin() {
+  haptic([80, 40, 80]);
   if (tutActive) {
     setTimeout(tutWin, 350);
+    return;
+  }
+  if (infiniteMode) {
+    infiniteCount++;
+    setTimeout(() => showWin(false, false), 350);
     return;
   }
   if (dailyMode) {
@@ -1244,6 +1339,7 @@ function nextLvl() {
 
 function nextLvlFromWin() {
   if (dailyMode) { goToMenu(); return; }
+  if (infiniteMode) { closeOverlay('win-overlay'); loadInfinite(); return; }
   closeOverlay('win-overlay');
   nextLvl();
 }
@@ -1263,6 +1359,12 @@ function showWin(earnedHint, isDaily) {
     dailyExtra.style.display = 'block';
     document.getElementById('daily-win-countdown').textContent = `Próximo desafio em ${getNextDailyIn()}`;
     nextBtn.textContent = '⌂ Voltar ao Menu';
+  } else if (infiniteMode) {
+    title.textContent = 'Muito Bem!';
+    sub.textContent = `Puzzle Infinito · #${infiniteCount}`;
+    reward.style.display = 'none';
+    dailyExtra.style.display = 'none';
+    nextBtn.textContent = 'Próximo →';
   } else {
     const m = LEVEL_META[curLvl];
     title.textContent = 'Puzzle Solved!';
@@ -1500,7 +1602,11 @@ function startTraining() {
 function goToMenu() {
   dailyMode = false;
   trainingMode = false;
+  infiniteMode = false;
+  infiniteCount = 0;
   document.getElementById('daily-badge').classList.remove('show');
+  document.getElementById('train-badge').classList.remove('show');
+  document.getElementById('infinite-badge').classList.remove('show');
   closeOverlay('win-overlay');
   closeOverlay('lvl-overlay');
   document.getElementById('menu-screen').classList.remove('hidden');
@@ -1562,10 +1668,63 @@ document.addEventListener('touchend', e => {
 // ─── Resize handler ───────────────────────────────────────────────────────────
 window.addEventListener('resize', applyGridSize);
 
+// ─── Animate correct rect ─────────────────────────────────────────────────────
+function animateCorrectRect(rect) {
+  const { r1, c1, r2, c2 } = rect;
+  for (let r = r1; r < r2; r++) {
+    for (let c = c1; c < c2; c++) {
+      const el = document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+      if (!el) continue;
+      el.classList.remove('r-pop');
+      void el.offsetWidth; // reflow to restart animation
+      el.classList.add('r-pop');
+      el.addEventListener('animationend', () => el.classList.remove('r-pop'), { once: true });
+    }
+  }
+}
+
+// ─── Infinite mode ────────────────────────────────────────────────────────────
+function loadInfinite() {
+  const seed = Date.now() ^ (infiniteCount * 0x9e3779b9);
+  const sizes = [5, 6, 7, 8];
+  const size = sizes[infiniteCount % sizes.length];
+  lvl = genLevel(seed, size, 9);
+  placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
+  document.getElementById('lvl-n').textContent = '∞';
+  document.getElementById('lvl-diff').textContent = `Infinito · #${infiniteCount + 1} · ${size}×${size}`;
+  document.getElementById('btn-next').classList.remove('show');
+  renderGrid();
+  updateCells();
+  closeOverlay('win-overlay');
+}
+
+function startInfinite() {
+  infiniteMode = true;
+  infiniteCount = 0;
+  document.getElementById('daily-badge').classList.remove('show');
+  document.getElementById('train-badge').classList.remove('show');
+  document.getElementById('infinite-badge').classList.add('show');
+  document.getElementById('menu-screen').classList.add('hidden');
+  loadInfinite();
+  updateHintBtn();
+}
+
+// ─── Colorblind mode ──────────────────────────────────────────────────────────
+function toggleColorblind(el) {
+  colorblindMode = !colorblindMode;
+  localStorage.setItem('bumi-cb', JSON.stringify(colorblindMode));
+  el.classList.toggle('active', colorblindMode);
+  updateCells();
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 const savedTheme = localStorage.getItem('bumi-theme') || 'pastel';
 const savedSwatch = document.querySelector(`[data-theme="${savedTheme}"]`);
 setTheme(savedTheme, savedSwatch);
+if (colorblindMode) {
+  const cbBtn = document.getElementById('cb-swatch');
+  if (cbBtn) cbBtn.classList.add('active');
+}
 loadLvl(0);
 updateHintBtn();
 updateDailyBtn();
