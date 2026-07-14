@@ -184,9 +184,76 @@ footer {
 
 /* Level picker */
 .level-sheet {
-  max-height: 72vh;
+  max-height: 80vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+.sheet-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.sheet-top-row h2 { margin-bottom: 0; }
+.btn-back-menu {
+  background: var(--surface);
+  border: 1.5px solid #e0d4e8;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text);
+}
+.btn-back-menu:active { opacity: 0.65; }
+.progress-section {
+  background: var(--surface);
+  border: 1.5px solid #e0d4e8;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.progress-total {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.progress-total span { color: var(--accent); }
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.progress-row:last-child { margin-bottom: 0; }
+.progress-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--sub);
+  min-width: 46px;
+}
+.progress-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: #e0d4e8;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.progress-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sub);
+  min-width: 28px;
+  text-align: right;
 }
 .diff-label {
   font-size: 11px;
@@ -391,7 +458,8 @@ footer {
 
 <header>
   <div class="hdr-left">
-    <button class="menu-btn" onclick="openLevels()">☰</button>
+    <button class="menu-btn" onclick="goToMenu()" title="Menu">⌂</button>
+    <button class="menu-btn" onclick="openLevels()" title="Níveis">☰</button>
     <h1>Bumi</h1>
     <span class="train-badge" id="train-badge">Treino</span>
   </div>
@@ -845,35 +913,68 @@ function updateLevelPicker() {
   const cont = document.getElementById('lvl-picker-content');
   cont.innerHTML = '';
 
-  let lastLabel = '', startIdx = 0;
-  const groups = [];
+  // ── Top row: title + back to menu ──
+  const topRow = document.createElement('div');
+  topRow.className = 'sheet-top-row';
+  const title = document.createElement('h2');
+  title.textContent = 'Níveis';
+  const backBtn = document.createElement('button');
+  backBtn.className = 'btn-back-menu';
+  backBtn.textContent = '⌂ Menu';
+  backBtn.onclick = () => { closeOverlay('lvl-overlay'); goToMenu(); };
+  topRow.appendChild(title);
+  topRow.appendChild(backBtn);
+  cont.appendChild(topRow);
 
-  LEVEL_META.forEach((m, i) => {
-    if (m.label !== lastLabel) {
-      if (lastLabel) groups[groups.length-1].end = i;
-      groups.push({ label: m.label, size: m.size, start: i });
-      lastLabel = m.label;
-    }
-  });
-  if (groups.length) groups[groups.length-1].end = 100;
+  // ── Progress section ──
+  const total = LEVEL_META.length;
+  const totalDone = solved.size;
+  const prog = document.createElement('div');
+  prog.className = 'progress-section';
 
-  // Merge consecutive same-label groups into sections
-  const sections = [];
-  for (const g of groups) {
-    if (sections.length && sections[sections.length-1].label === g.label) {
-      sections[sections.length-1].end = g.end;
-      sections[sections.length-1].size = g.size;
-    } else {
-      sections.push({...g});
-    }
-  }
+  const totLine = document.createElement('div');
+  totLine.className = 'progress-total';
+  totLine.innerHTML = `Progresso: <span>${totalDone}</span> / ${total} níveis completos`;
+  prog.appendChild(totLine);
 
-  // Rebuild sections cleanly
   let idx = 0;
+  for (const d of DIFFS) {
+    let doneCount = 0;
+    for (let i = 0; i < d.count; i++) { if (solved.has(idx + i)) doneCount++; }
+
+    const row = document.createElement('div');
+    row.className = 'progress-row';
+
+    const tag = document.createElement('div');
+    tag.className = 'progress-tag';
+    tag.textContent = d.label;
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'progress-bar-wrap';
+    const fill = document.createElement('div');
+    fill.className = 'progress-bar-fill';
+    fill.style.width = d.count > 0 ? `${(doneCount / d.count) * 100}%` : '0%';
+    barWrap.appendChild(fill);
+
+    const cnt = document.createElement('div');
+    cnt.className = 'progress-count';
+    cnt.textContent = `${doneCount}/${d.count}`;
+
+    row.appendChild(tag);
+    row.appendChild(barWrap);
+    row.appendChild(cnt);
+    prog.appendChild(row);
+
+    idx += d.count;
+  }
+  cont.appendChild(prog);
+
+  // ── Level grid per difficulty ──
+  idx = 0;
   for (const d of DIFFS) {
     const lbl = document.createElement('div');
     lbl.className = 'diff-label';
-    lbl.textContent = `${d.label} — ${d.size}×${d.size} (${d.count} levels)`;
+    lbl.textContent = `${d.label} — ${d.size}×${d.size} (${d.count} níveis)`;
     cont.appendChild(lbl);
 
     const grid = document.createElement('div');
@@ -925,6 +1026,12 @@ function startTraining() {
   document.getElementById('menu-screen').classList.add('hidden');
   loadLvl(0);
   updateHintBtn();
+}
+
+function goToMenu() {
+  closeOverlay('win-overlay');
+  closeOverlay('lvl-overlay');
+  document.getElementById('menu-screen').classList.remove('hidden');
 }
 
 // ─── Themes ───────────────────────────────────────────────────────────────────
