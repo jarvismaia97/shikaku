@@ -457,29 +457,42 @@ function genLevel(seed, size, maxArea) {
   const rects = [];
 
   function place(r1, c1, r2, c2) {
-    const area = (r2-r1)*(c2-c1);
-    const canH = r2-r1 >= 2, canV = c2-c1 >= 2;
+    const rows = r2-r1, cols = c2-c1;
+    const area = rows*cols;
+    const canH = rows >= 2, canV = cols >= 2;
 
     if (area <= maxArea) {
       const keep = area <= 2 ? 0.88 : area <= 4 ? 0.70 : 0.50;
       if (rng.next() < keep || (!canH && !canV)) {
-        rects.push({
-          r1, c1, r2, c2, area,
-          cr: rng.int(r1, r2-1),
-          cc: rng.int(c1, c2-1)
-        });
+        rects.push({ r1, c1, r2, c2, area, cr: rng.int(r1, r2-1), cc: rng.int(c1, c2-1) });
         return;
       }
     }
 
-    if (canH && (!canV || rng.next() < 0.5)) {
-      const mid = rng.int(r1+1, r2-1);
+    // Only split along an axis that won't produce a 1×1 sub-region.
+    // H-split: each piece is (mid-r1)×cols — safe if cols>=2 (always ok)
+    //          or cols=1 and rows>=4 so both halves have >=2 rows.
+    // V-split: each piece is rows×(mid-c1) — safe if rows>=2
+    //          or rows=1 and cols>=4.
+    const safeH = canH && (cols >= 2 || rows >= 4);
+    const safeV = canV && (rows >= 2 || cols >= 4);
+
+    if (!safeH && !safeV) {
+      // No safe split possible — keep as one rect
+      rects.push({ r1, c1, r2, c2, area, cr: rng.int(r1, r2-1), cc: rng.int(c1, c2-1) });
+      return;
+    }
+
+    if (safeH && (!safeV || rng.next() < 0.5)) {
+      const lo = r1 + (cols < 2 ? 2 : 1);
+      const hi = r2 - (cols < 2 ? 2 : 1);
+      const mid = rng.int(lo, hi);
       place(r1, c1, mid, c2); place(mid, c1, r2, c2);
-    } else if (canV) {
-      const mid = rng.int(c1+1, c2-1);
-      place(r1, c1, r2, mid); place(r1, mid, r2, c2);
     } else {
-      rects.push({ r1, c1, r2: r1+1, c2: c1+1, area: 1, cr: r1, cc: c1 });
+      const lo = c1 + (rows < 2 ? 2 : 1);
+      const hi = c2 - (rows < 2 ? 2 : 1);
+      const mid = rng.int(lo, hi);
+      place(r1, c1, r2, mid); place(r1, mid, r2, c2);
     }
   }
 
