@@ -206,85 +206,112 @@ footer {
   color: var(--text);
 }
 .btn-back-menu:active { opacity: 0.65; }
-.progress-section {
+/* Overall progress pill */
+.path-progress-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: var(--surface);
   border: 1.5px solid #e0d4e8;
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
+  border-radius: 30px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
 }
-.progress-total {
+.path-progress-text {
   font-size: 13px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 10px;
+  white-space: nowrap;
 }
-.progress-total span { color: var(--accent); }
-.progress-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.progress-row:last-child { margin-bottom: 0; }
-.progress-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--sub);
-  min-width: 46px;
-}
-.progress-bar-wrap {
+.path-progress-text span { color: var(--accent); }
+.path-bar-wrap {
   flex: 1;
   height: 6px;
   background: #e0d4e8;
   border-radius: 3px;
   overflow: hidden;
 }
-.progress-bar-fill {
+.path-bar-fill {
   height: 100%;
   background: var(--accent);
   border-radius: 3px;
   transition: width 0.4s ease;
 }
-.progress-count {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--sub);
-  min-width: 28px;
-  text-align: right;
+
+/* Path sections */
+.path-section {
+  display: flex;
+  gap: 0;
 }
-.diff-label {
+.path-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 32px;
+  flex-shrink: 0;
+}
+.path-node {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--node-color, #e0d4e8);
+  background: var(--node-color, #e0d4e8);
+  flex-shrink: 0;
+  margin-top: 12px;
+}
+.path-line {
+  width: 2px;
+  flex: 1;
+  background: #e0d4e8;
+  min-height: 12px;
+}
+.path-body {
+  flex: 1;
+  padding-bottom: 16px;
+}
+.path-section-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+.path-section-sub {
   font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
   color: var(--sub);
-  margin: 12px 0 6px;
+  margin-bottom: 10px;
 }
-.diff-label:first-child { margin-top: 0; }
-.lvl-grid {
+.path-lvl-grid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 5px;
-  margin-bottom: 4px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
 }
-.lvl-btn {
+.path-lvl-btn {
   aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid #e0d4e8;
   background: var(--surface);
-  border: 1.5px solid #e0d4e8;
-  border-radius: 7px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text);
+  color: var(--sub);
+  transition: transform 0.1s;
 }
-.lvl-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-.lvl-btn.done { background: #e8d5ff; border-color: #c4a0e8; color: #7040a0; }
+.path-lvl-btn:active { transform: scale(0.9); }
+.path-lvl-btn.done {
+  border-color: var(--node-color, var(--accent));
+  background: var(--node-bg, #ead5ff);
+  color: var(--node-color, var(--accent));
+}
+.path-lvl-btn.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px rgba(155,123,184,0.4);
+}
 
 /* Menu screen */
 #menu-screen {
@@ -918,7 +945,7 @@ function updateLevelPicker() {
   const topRow = document.createElement('div');
   topRow.className = 'sheet-top-row';
   const title = document.createElement('h2');
-  title.textContent = 'Níveis';
+  title.textContent = 'Caminho';
   const backBtn = document.createElement('button');
   backBtn.className = 'btn-back-menu';
   backBtn.textContent = '⌂ Menu';
@@ -927,73 +954,90 @@ function updateLevelPicker() {
   topRow.appendChild(backBtn);
   cont.appendChild(topRow);
 
-  // ── Progress section ──
-  const total = LEVEL_META.length;
+  // ── Overall progress pill ──
   const totalDone = solved.size;
-  const prog = document.createElement('div');
-  prog.className = 'progress-section';
+  const total = LEVEL_META.length;
+  const pill = document.createElement('div');
+  pill.className = 'path-progress-pill';
+  pill.innerHTML = `
+    <div class="path-progress-text"><span>${totalDone}</span> / ${total}</div>
+    <div class="path-bar-wrap"><div class="path-bar-fill" style="width:${(totalDone/total)*100}%"></div></div>
+  `;
+  cont.appendChild(pill);
 
-  const totLine = document.createElement('div');
-  totLine.className = 'progress-total';
-  totLine.innerHTML = `Progresso: <span>${totalDone}</span> / ${total} níveis completos`;
-  prog.appendChild(totLine);
+  // Colors per difficulty section
+  const SECTION_COLORS = [
+    { color: '#56a87a', bg: '#c3f0c8' },  // Easy 5×5  → floresta
+    { color: '#5a9fd4', bg: '#c5e3ff' },  // Easy 6×6  → oceano
+    { color: '#9b7bb8', bg: '#ead5ff' },  // Medium    → lavanda
+    { color: '#e07060', bg: '#ffe2c5' },  // Hard 8×8  → sunset
+    { color: '#c8a030', bg: '#fff0a0' },  // Hard 9×9  → amarelo
+    { color: '#e08898', bg: '#ffd6e0' },  // Expert    → rosa
+  ];
 
+  // ── Path ──
   let idx = 0;
-  for (const d of DIFFS) {
+  DIFFS.forEach((d, di) => {
+    const sc = SECTION_COLORS[di] || SECTION_COLORS[0];
+    const isLast = di === DIFFS.length - 1;
+
     let doneCount = 0;
     for (let i = 0; i < d.count; i++) { if (solved.has(idx + i)) doneCount++; }
 
-    const row = document.createElement('div');
-    row.className = 'progress-row';
+    const section = document.createElement('div');
+    section.className = 'path-section';
 
-    const tag = document.createElement('div');
-    tag.className = 'progress-tag';
-    tag.textContent = d.label;
+    // Spine: node + line
+    const spine = document.createElement('div');
+    spine.className = 'path-spine';
+    const node = document.createElement('div');
+    node.className = 'path-node';
+    node.style.setProperty('--node-color', sc.color);
+    node.style.background = doneCount === d.count ? sc.color : sc.bg;
+    node.style.borderColor = sc.color;
+    spine.appendChild(node);
+    if (!isLast) {
+      const line = document.createElement('div');
+      line.className = 'path-line';
+      spine.appendChild(line);
+    }
 
-    const barWrap = document.createElement('div');
-    barWrap.className = 'progress-bar-wrap';
-    const fill = document.createElement('div');
-    fill.className = 'progress-bar-fill';
-    fill.style.width = d.count > 0 ? `${(doneCount / d.count) * 100}%` : '0%';
-    barWrap.appendChild(fill);
+    // Body: label + level circles
+    const body = document.createElement('div');
+    body.className = 'path-body';
 
-    const cnt = document.createElement('div');
-    cnt.className = 'progress-count';
-    cnt.textContent = `${doneCount}/${d.count}`;
-
-    row.appendChild(tag);
-    row.appendChild(barWrap);
-    row.appendChild(cnt);
-    prog.appendChild(row);
-
-    idx += d.count;
-  }
-  cont.appendChild(prog);
-
-  // ── Level grid per difficulty ──
-  idx = 0;
-  for (const d of DIFFS) {
     const lbl = document.createElement('div');
-    lbl.className = 'diff-label';
-    lbl.textContent = `${d.label} — ${d.size}×${d.size} (${d.count} níveis)`;
-    cont.appendChild(lbl);
+    lbl.className = 'path-section-label';
+    lbl.textContent = `${d.label} · ${d.size}×${d.size}`;
+
+    const sub = document.createElement('div');
+    sub.className = 'path-section-sub';
+    sub.textContent = `${doneCount} / ${d.count} completos`;
 
     const grid = document.createElement('div');
-    grid.className = 'lvl-grid';
+    grid.className = 'path-lvl-grid';
+    grid.style.setProperty('--node-color', sc.color);
+    grid.style.setProperty('--node-bg', sc.bg);
 
     for (let i = 0; i < d.count; i++) {
       const btn = document.createElement('button');
-      btn.className = 'lvl-btn';
+      btn.className = 'path-lvl-btn';
       if (idx === curLvl) btn.classList.add('active');
-      if (solved.has(idx)) btn.classList.add('done');
+      else if (solved.has(idx)) btn.classList.add('done');
       btn.textContent = idx + 1;
       const ii = idx;
       btn.onclick = () => loadLvl(ii);
       grid.appendChild(btn);
       idx++;
     }
-    cont.appendChild(grid);
-  }
+
+    body.appendChild(lbl);
+    body.appendChild(sub);
+    body.appendChild(grid);
+    section.appendChild(spine);
+    section.appendChild(body);
+    cont.appendChild(section);
+  });
 }
 
 // ─── Overlay helpers ──────────────────────────────────────────────────────────
