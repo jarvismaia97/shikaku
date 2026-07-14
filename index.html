@@ -49,6 +49,8 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   padding: 12px 20px;
   width: 100%;
   max-width: 480px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 #grid {
   background: var(--grid-sep);
@@ -56,12 +58,10 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   border: 2px solid var(--grid-sep);
   overflow: hidden;
   display: grid;
-  gap: 2px;
+  gap: 1px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  width: min(calc(100vw - 40px), 440px);
-  height: min(calc(100vw - 40px), 440px);
 }
 .cell {
   background: var(--surface);
@@ -73,10 +73,12 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   position: relative;
   color: var(--text);
   transition: background 0.08s;
-  aspect-ratio: 1;
-  min-width: 0;
-  min-height: 0;
+  width: var(--cell-size, 44px);
+  height: var(--cell-size, 44px);
+  min-width: var(--cell-size, 44px);
+  min-height: var(--cell-size, 44px);
   overflow: hidden;
+  border: 1px solid transparent;
 }
 .cell.preview { background: rgba(155, 123, 184, 0.18); }
 .cell.preview-bad { background: rgba(220, 80, 120, 0.18); }
@@ -572,13 +574,20 @@ let cellEls  = [];
 // ─── Grid rendering ───────────────────────────────────────────────────────────
 function renderGrid() {
   const g = document.getElementById('grid');
+  const wrap = document.getElementById('grid-wrap');
   g.innerHTML = '';
   cellEls = [];
   const { size } = lvl;
-  g.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
 
-  g.style.gridTemplateRows = `repeat(${size}, 1fr)`;
-  const fs = size >= 10 ? '11px' : size >= 9 ? '12px' : size >= 8 ? '13px' : size >= 7 ? '14px' : '17px';
+  // Fixed cell size: fill available space but never smaller than 32px
+  const available = Math.min(wrap.clientWidth - 24, wrap.clientHeight - 24, 440);
+  const cellPx = Math.max(32, Math.floor((available - size - 2) / size));
+  document.documentElement.style.setProperty('--cell-size', cellPx + 'px');
+
+  g.style.gridTemplateColumns = `repeat(${size}, var(--cell-size, 44px))`;
+  g.style.gridTemplateRows    = `repeat(${size}, var(--cell-size, 44px))`;
+
+  const fs = cellPx >= 40 ? '17px' : cellPx >= 36 ? '14px' : cellPx >= 32 ? '12px' : '11px';
 
   for (let r = 0; r < size; r++) {
     cellEls[r] = [];
