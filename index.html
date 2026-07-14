@@ -455,21 +455,17 @@ footer {
 
 <!-- Menu screen -->
 <div id="menu-screen">
-  <div class="menu-logo">🌴</div>
-  <div class="menu-title">Bumi</div>
-  <p class="menu-sub">Explora as ilhas dividindo a grelha em retângulos. Cada ilha tem o seu número.</p>
+  <div class="menu-title">🌴 Bumi 🌴</div>
+  <p class="menu-sub">Divide a grelha em retângulos. Cada um contém exatamente um número.</p>
   <div class="menu-how">
     <div class="menu-how-item">
-      <span class="menu-how-icon">🌴</span>
-      <span class="menu-how-text"><strong>Arrasta</strong> para marcar o território da ilha</span>
+      <span class="menu-how-text"><strong>Desenha</strong> retângulos arrastando o dedo</span>
     </div>
     <div class="menu-how-item">
-      <span class="menu-how-icon">🌴</span>
-      <span class="menu-how-text"><strong>O número</strong> indica quantas casas a ilha ocupa</span>
+      <span class="menu-how-text"><strong>Cada número</strong> indica a área do retângulo</span>
     </div>
     <div class="menu-how-item">
-      <span class="menu-how-icon">🌴</span>
-      <span class="menu-how-text"><strong>Conquista ilhas</strong> para ganhar dicas</span>
+      <span class="menu-how-text"><strong>Completa níveis</strong> para ganhar hints</span>
     </div>
   </div>
   <div class="theme-label">Tema</div>
@@ -481,9 +477,9 @@ footer {
     <button class="theme-swatch" style="background:#4a4a6a" data-theme="dark" onclick="setTheme('dark',this)" title="Escuro"></button>
   </div>
   <div class="menu-btns">
-    <button class="menu-play" onclick="startGame()">🌴 Explorar →</button>
-    <button class="menu-levels-btn" onclick="startAndLevels()">🌴 Escolher Ilha</button>
-    <button class="menu-train-btn" onclick="startTraining()">🌴 Modo Treino</button>
+    <button class="menu-play" onclick="startGame()">Jogar →</button>
+    <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
+    <button class="menu-train-btn" onclick="startTraining()">Modo Treino</button>
   </div>
 </div>
 
@@ -491,7 +487,7 @@ footer {
   <div class="hdr-left">
     <button class="menu-btn" onclick="goToMenu()" title="Menu">⌂</button>
     <button class="menu-btn" onclick="openLevels()" title="Níveis">☰</button>
-    <h1>Bumi</h1>
+    <h1>🌴 Bumi 🌴</h1>
     <span class="train-badge" id="train-badge">Treino</span>
   </div>
   <div class="hdr-right">
@@ -516,10 +512,9 @@ footer {
 <div class="overlay" id="win-overlay" onclick="closeIfBg(event,'win-overlay')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="win-emoji">🌴</div>
-    <h2 style="text-align:center">Ilha Conquistada!</h2>
+    <h2 style="text-align:center">Puzzle Solved!</h2>
     <p class="sub" id="win-sub" style="text-align:center">Level 1 · Easy</p>
-    <div id="hint-reward" style="display:none;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;color:#9b7bb8;">+1 dica de palmeira ganha!</div>
+    <div id="hint-reward" style="display:none;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;color:#9b7bb8;">+1 Hint earned!</div>
     <div class="win-actions">
       <button class="btn-secondary" onclick="closeOverlay('win-overlay')">Review</button>
       <button class="btn-wide" onclick="nextLvlFromWin()">Next Level →</button>
@@ -972,12 +967,12 @@ function updateLevelPicker() {
 
   // Tropical island names per difficulty section
   const ISLAND_NAMES = [
-    { name: '🌴 Praia',   sub: 'Areias tranquilas' },
-    { name: '🌴 Lagoa',   sub: 'Águas cristalinas' },
-    { name: '🌴 Selva',   sub: 'Palmeiras densas' },
-    { name: '🌴 Vulcão',  sub: 'Terreno acidentado' },
-    { name: '🌴 Pico',    sub: 'Ventos selvagens' },
-    { name: '🌴 Paraíso', sub: 'Apenas os melhores chegam' },
+    { name: 'Praia',   sub: 'Areias tranquilas' },
+    { name: 'Lagoa',   sub: 'Águas cristalinas' },
+    { name: 'Selva',   sub: 'Palmeiras densas' },
+    { name: 'Vulcão',  sub: 'Terreno acidentado' },
+    { name: 'Pico',    sub: 'Ventos selvagens' },
+    { name: 'Paraíso', sub: 'Apenas os melhores chegam' },
   ];
 
   // Colors per difficulty section
