@@ -477,6 +477,46 @@ footer {
   cursor: pointer;
 }
 .menu-train-btn:active { opacity: 0.65; }
+.menu-daily-btn {
+  background: linear-gradient(135deg, #fff8d0, #ffe870);
+  color: #8a6000;
+  border: 1.5px solid #f0c820;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.menu-daily-btn.done {
+  background: #e8f5ee;
+  color: #2e8a50;
+  border-color: #90d0a0;
+}
+.menu-daily-btn:active { opacity: 0.75; }
+.daily-badge {
+  display: none;
+  background: linear-gradient(135deg, #fff8d0, #ffe870);
+  color: #8a6000;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1.5px solid #f0c820;
+}
+.daily-badge.show { display: inline-block; }
+.daily-win-extra {
+  display: none;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.daily-win-emoji { font-size: 36px; margin-bottom: 6px; }
+.daily-win-countdown {
+  font-size: 13px;
+  color: var(--sub);
+  margin-top: 6px;
+}
 
 /* Training badge */
 .train-badge {
@@ -589,6 +629,7 @@ footer {
     <button class="theme-swatch" style="background:#4a4a6a" data-theme="dark" onclick="setTheme('dark',this)" title="Escuro"></button>
   </div>
   <div class="menu-btns">
+    <button class="menu-daily-btn" id="daily-menu-btn" onclick="startDaily()">☀️ Desafio Diário</button>
     <button class="menu-play" onclick="startGame()">Jogar →</button>
     <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
     <button class="menu-train-btn" onclick="startTraining()">Modo Treino</button>
@@ -601,6 +642,7 @@ footer {
     <button class="menu-btn" onclick="openLevels()" title="Níveis">☰</button>
     <h1>Bumi 🌴</h1>
     <span class="train-badge" id="train-badge">Treino</span>
+    <span class="daily-badge" id="daily-badge">Diário</span>
   </div>
   <div class="hdr-right">
     <div class="level-num">Level <span id="lvl-n">1</span></div>
@@ -624,12 +666,16 @@ footer {
 <div class="overlay" id="win-overlay" onclick="closeIfBg(event,'win-overlay')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <h2 style="text-align:center">Puzzle Solved!</h2>
+    <h2 id="win-title" style="text-align:center">Puzzle Solved!</h2>
     <p class="sub" id="win-sub" style="text-align:center">Level 1 · Easy</p>
     <div id="hint-reward" style="display:none;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;color:#9b7bb8;">+1 Hint earned!</div>
+    <div class="daily-win-extra" id="daily-win-extra">
+      <div class="daily-win-emoji">☀️</div>
+      <div class="daily-win-countdown" id="daily-win-countdown"></div>
+    </div>
     <div class="win-actions">
       <button class="btn-secondary" onclick="closeOverlay('win-overlay')">Review</button>
-      <button class="btn-wide" onclick="nextLvlFromWin()">Next Level →</button>
+      <button class="btn-wide" id="win-next-btn" onclick="nextLvlFromWin()">Next Level →</button>
     </div>
   </div>
 </div>
@@ -891,6 +937,8 @@ function updateHintBtn() {
     btn.style.opacity = hints <= 0 ? '0.4' : '';
   }
 }
+
+// also allow hints in daily mode (curLvl === -2 won't match curLvl===0 so hints work normally)
 let cellEls  = [];
 
 // ─── Grid rendering ───────────────────────────────────────────────────────────
@@ -1120,6 +1168,12 @@ function markWin() {
     setTimeout(tutWin, 350);
     return;
   }
+  if (dailyMode) {
+    const isNew = !isDailyDone();
+    if (isNew) localStorage.setItem(getDailyKey(), '1');
+    setTimeout(() => showWin(false, true), 350);
+    return;
+  }
   const isNew = !solved.has(curLvl);
   if (!trainingMode) {
     solved.add(curLvl);
@@ -1127,7 +1181,7 @@ function markWin() {
   }
   updateLevelPicker();
   document.getElementById('btn-next').classList.add('show');
-  setTimeout(() => showWin(isNew && !trainingMode && curLvl > 0), 350);
+  setTimeout(() => showWin(isNew && !trainingMode && curLvl > 0, false), 350);
 }
 
 // ─── Level loading ────────────────────────────────────────────────────────────
@@ -1149,16 +1203,34 @@ function nextLvl() {
 }
 
 function nextLvlFromWin() {
+  if (dailyMode) { goToMenu(); return; }
   closeOverlay('win-overlay');
   nextLvl();
 }
 
 // ─── Win overlay ──────────────────────────────────────────────────────────────
-function showWin(earnedHint) {
-  const m = LEVEL_META[curLvl];
-  document.getElementById('win-sub').textContent = `Level ${curLvl+1} · ${m.label}`;
+function showWin(earnedHint, isDaily) {
+  const title = document.getElementById('win-title');
+  const sub = document.getElementById('win-sub');
   const reward = document.getElementById('hint-reward');
-  reward.style.display = earnedHint ? 'block' : 'none';
+  const dailyExtra = document.getElementById('daily-win-extra');
+  const nextBtn = document.getElementById('win-next-btn');
+
+  if (isDaily) {
+    title.textContent = 'Desafio Completo!';
+    sub.textContent = new Date().toLocaleDateString('pt-PT', { day:'numeric', month:'long' });
+    reward.style.display = 'none';
+    dailyExtra.style.display = 'block';
+    document.getElementById('daily-win-countdown').textContent = `Próximo desafio em ${getNextDailyIn()}`;
+    nextBtn.textContent = '⌂ Voltar ao Menu';
+  } else {
+    const m = LEVEL_META[curLvl];
+    title.textContent = 'Puzzle Solved!';
+    sub.textContent = `Level ${curLvl+1} · ${m.label}`;
+    reward.style.display = earnedHint ? 'block' : 'none';
+    dailyExtra.style.display = 'none';
+    nextBtn.textContent = 'Next Level →';
+  }
   document.getElementById('win-overlay').classList.add('show');
 }
 
@@ -1298,31 +1370,101 @@ function closeIfBg(e, id) {
   if (e.target === document.getElementById(id)) closeOverlay(id);
 }
 
+// ─── Daily mode ───────────────────────────────────────────────────────────────
+let dailyMode = false;
+
+function getDailyKey() {
+  const d = new Date();
+  return `bumi-daily-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function isDailyDone() {
+  return !!localStorage.getItem(getDailyKey());
+}
+
+function getDailyLevel() {
+  const d = new Date();
+  const seed = parseInt(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`);
+  const doy = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+  const sizes = [5, 6, 6, 7, 5, 6, 7];
+  const size = sizes[doy % sizes.length];
+  return genLevel(seed, size, 9);
+}
+
+function getNextDailyIn() {
+  const now = new Date();
+  const midnight = new Date(now); midnight.setHours(24, 0, 0, 0);
+  const diff = midnight - now;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  return `${h}h ${m}m`;
+}
+
+function updateDailyBtn() {
+  const btn = document.getElementById('daily-menu-btn');
+  if (!btn) return;
+  if (isDailyDone()) {
+    btn.textContent = '✓ Desafio feito hoje';
+    btn.classList.add('done');
+  } else {
+    btn.textContent = '☀️ Desafio Diário';
+    btn.classList.remove('done');
+  }
+}
+
+function startDaily() {
+  dailyMode = true;
+  trainingMode = false;
+  document.getElementById('train-badge').classList.remove('show');
+  document.getElementById('daily-badge').classList.add('show');
+  document.getElementById('menu-screen').classList.add('hidden');
+
+  lvl = getDailyLevel();
+  curLvl = -2;
+  placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
+
+  const d = new Date();
+  document.getElementById('lvl-n').textContent = `${d.getDate()}/${d.getMonth()+1}`;
+  document.getElementById('lvl-diff').textContent = 'Desafio Diário';
+  document.getElementById('btn-next').classList.remove('show');
+  renderGrid();
+  updateCells();
+  updateHintBtn();
+}
+
 // ─── Menu ─────────────────────────────────────────────────────────────────────
 function startGame() {
   startTutorial();
 }
 
 function startAndLevels() {
+  dailyMode = false;
   trainingMode = false;
   document.getElementById('train-badge').classList.remove('show');
+  document.getElementById('daily-badge').classList.remove('show');
   document.getElementById('menu-screen').classList.add('hidden');
   updateHintBtn();
   openLevels();
 }
 
 function startTraining() {
+  dailyMode = false;
   trainingMode = true;
   document.getElementById('train-badge').classList.add('show');
+  document.getElementById('daily-badge').classList.remove('show');
   document.getElementById('menu-screen').classList.add('hidden');
   loadLvl(0);
   updateHintBtn();
 }
 
 function goToMenu() {
+  dailyMode = false;
+  trainingMode = false;
+  document.getElementById('daily-badge').classList.remove('show');
   closeOverlay('win-overlay');
   closeOverlay('lvl-overlay');
   document.getElementById('menu-screen').classList.remove('hidden');
+  updateDailyBtn();
 }
 
 // ─── Themes ───────────────────────────────────────────────────────────────────
@@ -1365,6 +1507,7 @@ const savedSwatch = document.querySelector(`[data-theme="${savedTheme}"]`);
 setTheme(savedTheme, savedSwatch);
 loadLvl(0);
 updateHintBtn();
+updateDailyBtn();
 </script>
 </body>
 </html>
