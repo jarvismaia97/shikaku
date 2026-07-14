@@ -455,17 +455,21 @@ footer {
 
 <!-- Menu screen -->
 <div id="menu-screen">
+  <div class="menu-logo">🌴</div>
   <div class="menu-title">Bumi</div>
-  <p class="menu-sub">Divide a grelha em retângulos. Cada um contém exatamente um número.</p>
+  <p class="menu-sub">Explora as ilhas dividindo a grelha em retângulos. Cada ilha tem o seu número.</p>
   <div class="menu-how">
     <div class="menu-how-item">
-      <span class="menu-how-text"><strong>Desenha</strong> retângulos arrastando o dedo</span>
+      <span class="menu-how-icon">🏖️</span>
+      <span class="menu-how-text"><strong>Arrasta</strong> para marcar o território da ilha</span>
     </div>
     <div class="menu-how-item">
-      <span class="menu-how-text"><strong>Cada número</strong> indica a área do retângulo</span>
+      <span class="menu-how-icon">🌊</span>
+      <span class="menu-how-text"><strong>O número</strong> indica quantas casas a ilha ocupa</span>
     </div>
     <div class="menu-how-item">
-      <span class="menu-how-text"><strong>Completa níveis</strong> para ganhar hints</span>
+      <span class="menu-how-icon">🌴</span>
+      <span class="menu-how-text"><strong>Conquista ilhas</strong> para ganhar dicas</span>
     </div>
   </div>
   <div class="theme-label">Tema</div>
@@ -477,9 +481,9 @@ footer {
     <button class="theme-swatch" style="background:#4a4a6a" data-theme="dark" onclick="setTheme('dark',this)" title="Escuro"></button>
   </div>
   <div class="menu-btns">
-    <button class="menu-play" onclick="startGame()">Jogar →</button>
-    <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
-    <button class="menu-train-btn" onclick="startTraining()">Modo Treino</button>
+    <button class="menu-play" onclick="startGame()">🌴 Explorar →</button>
+    <button class="menu-levels-btn" onclick="startAndLevels()">🗺️ Escolher Ilha</button>
+    <button class="menu-train-btn" onclick="startTraining()">🏄 Modo Treino</button>
   </div>
 </div>
 
@@ -512,9 +516,10 @@ footer {
 <div class="overlay" id="win-overlay" onclick="closeIfBg(event,'win-overlay')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <h2 style="text-align:center">Puzzle Solved!</h2>
+    <div class="win-emoji">🌴</div>
+    <h2 style="text-align:center">Ilha Conquistada!</h2>
     <p class="sub" id="win-sub" style="text-align:center">Level 1 · Easy</p>
-    <div id="hint-reward" style="display:none;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;color:#9b7bb8;">+1 Hint earned!</div>
+    <div id="hint-reward" style="display:none;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;color:#9b7bb8;">+1 dica de palmeira ganha!</div>
     <div class="win-actions">
       <button class="btn-secondary" onclick="closeOverlay('win-overlay')">Review</button>
       <button class="btn-wide" onclick="nextLvlFromWin()">Next Level →</button>
@@ -965,14 +970,24 @@ function updateLevelPicker() {
   `;
   cont.appendChild(pill);
 
+  // Tropical island names per difficulty section
+  const ISLAND_NAMES = [
+    { name: '🏖️ Praia',   sub: 'Areias tranquilas' },
+    { name: '🌊 Lagoa',   sub: 'Águas cristalinas' },
+    { name: '🌴 Selva',   sub: 'Palmeiras densas' },
+    { name: '🌋 Vulcão',  sub: 'Terreno acidentado' },
+    { name: '🦜 Pico',    sub: 'Ventos selvagens' },
+    { name: '🌺 Paraíso', sub: 'Apenas os melhores chegam' },
+  ];
+
   // Colors per difficulty section
   const SECTION_COLORS = [
-    { color: '#56a87a', bg: '#c3f0c8' },  // Easy 5×5  → floresta
-    { color: '#5a9fd4', bg: '#c5e3ff' },  // Easy 6×6  → oceano
-    { color: '#9b7bb8', bg: '#ead5ff' },  // Medium    → lavanda
-    { color: '#e07060', bg: '#ffe2c5' },  // Hard 8×8  → sunset
-    { color: '#c8a030', bg: '#fff0a0' },  // Hard 9×9  → amarelo
-    { color: '#e08898', bg: '#ffd6e0' },  // Expert    → rosa
+    { color: '#56a87a', bg: '#c3f0c8' },
+    { color: '#5a9fd4', bg: '#c5e3ff' },
+    { color: '#9b7bb8', bg: '#ead5ff' },
+    { color: '#e07060', bg: '#ffe2c5' },
+    { color: '#c8a030', bg: '#fff0a0' },
+    { color: '#e08898', bg: '#ffd6e0' },
   ];
 
   // ── Path ──
@@ -1008,11 +1023,12 @@ function updateLevelPicker() {
 
     const lbl = document.createElement('div');
     lbl.className = 'path-section-label';
-    lbl.textContent = `${d.label} · ${d.size}×${d.size}`;
+    const island = ISLAND_NAMES[di] || { name: d.label, sub: '' };
+    lbl.textContent = `${island.name} · ${d.size}×${d.size}`;
 
     const sub = document.createElement('div');
     sub.className = 'path-section-sub';
-    sub.textContent = `${doneCount} / ${d.count} completos`;
+    sub.textContent = `${island.sub} · ${doneCount}/${d.count} ilhas`;
 
     const grid = document.createElement('div');
     grid.className = 'path-lvl-grid';
