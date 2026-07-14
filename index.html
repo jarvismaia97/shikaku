@@ -423,6 +423,48 @@ footer {
 }
 .train-badge.show { display: inline-block; }
 
+/* Tutorial card */
+#tut-card {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 300;
+  padding: 0 0 max(env(safe-area-inset-bottom,0px),20px);
+}
+.tut-inner {
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 22px 22px 0 0;
+  padding: 20px 20px 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.tut-dots {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.tut-dot {
+  height: 6px;
+  border-radius: 3px;
+  transition: width 0.2s, background 0.2s;
+}
+.tut-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+.tut-body  { font-size: 14px; opacity: 0.82; line-height: 1.55; margin-bottom: 18px; }
+.tut-btn {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tut-btn:active { opacity: 0.8; }
+
 /* Theme picker */
 .theme-row {
   display: flex;
@@ -527,6 +569,16 @@ footer {
   <div class="sheet level-sheet" id="lvl-sheet">
     <div class="sheet-handle"></div>
     <div id="lvl-picker-content"></div>
+  </div>
+</div>
+
+<!-- Tutorial card -->
+<div id="tut-card">
+  <div class="tut-inner">
+    <div class="tut-dots" id="tut-dots"></div>
+    <div class="tut-title" id="tut-title"></div>
+    <div class="tut-body" id="tut-body"></div>
+    <button class="tut-btn" id="tut-btn"></button>
   </div>
 </div>
 
@@ -640,6 +692,86 @@ const BD_PAL = [
   '#c8a030',  // amarelo
 ];
 
+// ─── Tutorial ─────────────────────────────────────────────────────────────────
+const TUTORIAL_LEVEL = {
+  size: 3,
+  clues: [
+    { r: 0, c: 1, v: 3 },
+    { r: 1, c: 0, v: 4 },
+    { r: 1, c: 2, v: 2 },
+  ],
+  solution: [
+    { r1: 0, c1: 0, r2: 1, c2: 3 },
+    { r1: 1, c1: 0, r2: 3, c2: 2 },
+    { r1: 1, c1: 2, r2: 3, c2: 3 },
+  ],
+};
+const TUT_STEPS = [
+  { title: 'Bem-vindo ao Bumi 🌴', body: 'O objetivo é dividir toda a grelha em retângulos — sem sobrepor e sem deixar espaços vazios.', btn: 'Continuar →' },
+  { title: 'O número é uma pista',  body: 'Cada número indica quantas casas o retângulo deve ter. O "3" ocupa 3 casas, o "4" ocupa 4 casas.', btn: 'Continuar →' },
+  { title: 'Arrasta para criar',    body: 'Toca e arrasta de um canto ao outro para criar um retângulo. Toca num retângulo já colocado para o apagar.', btn: 'Resolver o puzzle →' },
+];
+let tutActive = false;
+let tutStep   = 0;
+
+function startTutorial() {
+  tutActive = true; tutStep = 0;
+  trainingMode = false;
+  document.getElementById('train-badge').classList.remove('show');
+  document.getElementById('menu-screen').classList.add('hidden');
+  lvl = JSON.parse(JSON.stringify(TUTORIAL_LEVEL));
+  curLvl = -1;
+  placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
+  document.getElementById('lvl-n').textContent = '0';
+  document.getElementById('lvl-diff').textContent = 'Tutorial · 3×3';
+  document.getElementById('btn-next').classList.remove('show');
+  renderGrid(); updateCells(); updateHintBtn();
+  showTutCard();
+}
+
+function showTutCard() {
+  const step = TUT_STEPS[tutStep];
+  document.getElementById('tut-card').style.display = 'block';
+  const dotsEl = document.getElementById('tut-dots');
+  dotsEl.innerHTML = '';
+  TUT_STEPS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'tut-dot';
+    d.style.width = i === tutStep ? '18px' : '6px';
+    d.style.background = i === tutStep ? 'var(--accent)' : 'rgba(255,255,255,0.3)';
+    dotsEl.appendChild(d);
+  });
+  document.getElementById('tut-title').textContent = step.title;
+  document.getElementById('tut-body').textContent  = step.body;
+  const btn = document.getElementById('tut-btn');
+  btn.textContent = step.btn;
+  btn.onclick = tutNext;
+}
+
+function tutNext() {
+  tutStep++;
+  if (tutStep >= TUT_STEPS.length) {
+    document.getElementById('tut-card').style.display = 'none';
+  } else {
+    showTutCard();
+  }
+}
+
+function tutWin() {
+  document.getElementById('tut-card').style.display = 'block';
+  document.getElementById('tut-dots').innerHTML = '';
+  document.getElementById('tut-title').textContent = 'Fantástico! 🌴';
+  document.getElementById('tut-body').textContent  = 'Dominaste o tutorial! Agora vamos ao Nível 1 — desta vez sem dicas!';
+  const btn = document.getElementById('tut-btn');
+  btn.textContent = 'Jogar Nível 1 →';
+  btn.onclick = () => {
+    tutActive = false;
+    document.getElementById('tut-card').style.display = 'none';
+    loadLvl(0);
+    updateHintBtn();
+  };
+}
+
 // ─── Game state ───────────────────────────────────────────────────────────────
 let curLvl = 0;
 let lvl    = null;
@@ -653,14 +785,17 @@ let hints  = 3;
 let trainingMode = false;
 
 function updateHintBtn() {
-  if (trainingMode) {
+  const btn = document.getElementById('btn-hint');
+  if (trainingMode || tutActive) {
     document.getElementById('hint-label').textContent = 'Hint · ∞';
-    const btn = document.getElementById('btn-hint');
     btn.disabled = false;
     btn.style.opacity = '';
+  } else if (curLvl === 0) {
+    document.getElementById('hint-label').textContent = 'Hint · —';
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
   } else {
     document.getElementById('hint-label').textContent = `Hint · ${hints}`;
-    const btn = document.getElementById('btn-hint');
     btn.disabled = hints <= 0;
     btn.style.opacity = hints <= 0 ? '0.4' : '';
   }
@@ -875,7 +1010,7 @@ function doClear() {
 }
 
 function doHint() {
-  if (!trainingMode && hints <= 0) return;
+  if (!trainingMode && !tutActive && (hints <= 0 || curLvl === 0)) return;
   const avail = lvl.solution.filter(sol => {
     const s = { r1: sol.r1, c1: sol.c1, r2: sol.r2, c2: sol.c2 };
     return !placed.some(p => rectsOverlap(s, p));
@@ -889,14 +1024,18 @@ function doHint() {
 }
 
 function markWin() {
+  if (tutActive) {
+    setTimeout(tutWin, 350);
+    return;
+  }
   const isNew = !solved.has(curLvl);
   if (!trainingMode) {
     solved.add(curLvl);
-    if (isNew) { hints++; updateHintBtn(); }
+    if (isNew && curLvl > 0) { hints++; updateHintBtn(); }
   }
   updateLevelPicker();
   document.getElementById('btn-next').classList.add('show');
-  setTimeout(() => showWin(isNew && !trainingMode), 350);
+  setTimeout(() => showWin(isNew && !trainingMode && curLvl > 0), 350);
 }
 
 // ─── Level loading ────────────────────────────────────────────────────────────
@@ -1062,10 +1201,7 @@ function closeIfBg(e, id) {
 
 // ─── Menu ─────────────────────────────────────────────────────────────────────
 function startGame() {
-  trainingMode = false;
-  document.getElementById('train-badge').classList.remove('show');
-  document.getElementById('menu-screen').classList.add('hidden');
-  updateHintBtn();
+  startTutorial();
 }
 
 function startAndLevels() {
