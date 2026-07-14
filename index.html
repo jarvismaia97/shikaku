@@ -206,111 +206,181 @@ footer {
   color: var(--text);
 }
 .btn-back-menu:active { opacity: 0.65; }
-/* Overall progress pill */
-.path-progress-pill {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--surface);
-  border: 1.5px solid #e0d4e8;
-  border-radius: 30px;
-  padding: 8px 16px;
+/* Overall progress banner */
+.path-hero {
+  background: linear-gradient(135deg, #ead5ff 0%, #c5e3ff 100%);
+  border-radius: 18px;
+  padding: 16px 18px 14px;
   margin-bottom: 20px;
+  text-align: center;
 }
-.path-progress-text {
-  font-size: 13px;
+.path-hero-title {
+  font-size: 11px;
   font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9b7bb8;
+  margin-bottom: 6px;
 }
-.path-progress-text span { color: var(--accent); }
+.path-hero-count {
+  font-size: 28px;
+  font-weight: 800;
+  color: #7b5aa0;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.path-hero-count span { font-size: 15px; font-weight: 500; color: #9b7bb8; }
 .path-bar-wrap {
-  flex: 1;
-  height: 6px;
-  background: #e0d4e8;
-  border-radius: 3px;
+  height: 7px;
+  background: rgba(155,123,184,0.2);
+  border-radius: 4px;
   overflow: hidden;
 }
 .path-bar-fill {
   height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
-  transition: width 0.4s ease;
+  background: linear-gradient(90deg, #9b7bb8, #7b5aa0);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(.4,0,.2,1);
 }
 
-/* Path sections */
-.path-section {
-  display: flex;
-  gap: 0;
-}
-.path-spine {
+/* Path connector */
+.path-connector {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 32px;
-  flex-shrink: 0;
-}
-.path-node {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid var(--node-color, #e0d4e8);
-  background: var(--node-color, #e0d4e8);
-  flex-shrink: 0;
-  margin-top: 12px;
-}
-.path-line {
+  margin: 0 auto;
+  height: 28px;
   width: 2px;
-  flex: 1;
-  background: #e0d4e8;
-  min-height: 12px;
+  background: repeating-linear-gradient(to bottom, #d0c4e0 0px, #d0c4e0 4px, transparent 4px, transparent 8px);
 }
-.path-body {
-  flex: 1;
-  padding-bottom: 16px;
+
+/* Island cards */
+.path-card {
+  border-radius: 20px;
+  padding: 16px 16px 14px;
+  margin-bottom: 0;
+  border: 2px solid var(--card-color, #e0d4e8);
+  background: var(--card-bg, #f8f4ff);
+  position: relative;
+  overflow: hidden;
+  transition: opacity 0.3s;
 }
-.path-section-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  margin-top: 10px;
-  margin-bottom: 2px;
+.path-card.locked {
+  opacity: 0.45;
+  filter: grayscale(0.6);
 }
-.path-section-sub {
+.path-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.path-card-icon {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.path-card-meta { flex: 1; }
+.path-card-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--card-color, var(--text));
+  line-height: 1.1;
+}
+.path-card-grid-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--card-color, var(--sub));
+  opacity: 0.75;
+  margin-top: 1px;
+}
+.path-card-badge {
   font-size: 11px;
-  color: var(--sub);
+  font-weight: 700;
+  color: var(--card-color, var(--sub));
+  background: var(--card-bg, #e0d4e8);
+  border: 1.5px solid var(--card-color, #e0d4e8);
+  border-radius: 20px;
+  padding: 2px 10px;
+  flex-shrink: 0;
+}
+.path-card-story {
+  font-size: 12px;
+  color: var(--text);
+  font-style: italic;
+  opacity: 0.72;
   margin-bottom: 10px;
+  line-height: 1.45;
+}
+.path-card-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.path-card-bar-wrap {
+  flex: 1;
+  height: 5px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.path-card-bar-fill {
+  height: 100%;
+  background: var(--card-color, #9b7bb8);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.path-card-prog-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--card-color, var(--sub));
+  white-space: nowrap;
 }
 .path-lvl-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  gap: 7px;
 }
 .path-lvl-btn {
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 2px solid #e0d4e8;
-  background: var(--surface);
+  border: 2px solid rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.6);
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--sub);
+  color: var(--card-color, var(--sub));
   transition: transform 0.1s;
 }
-.path-lvl-btn:active { transform: scale(0.9); }
+.path-lvl-btn:active { transform: scale(0.88); }
 .path-lvl-btn.done {
-  border-color: var(--node-color, var(--accent));
-  background: var(--node-bg, #ead5ff);
-  color: var(--node-color, var(--accent));
+  border-color: var(--card-color, var(--accent));
+  background: var(--card-color, #ead5ff);
+  color: #fff;
 }
 .path-lvl-btn.active {
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: var(--card-color, var(--accent));
+  background: var(--card-color, var(--accent));
   color: white;
-  box-shadow: 0 2px 8px rgba(155,123,184,0.4);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+  transform: scale(1.08);
+}
+.path-card-complete-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--card-color);
+  opacity: 0.8;
 }
 
 /* Menu screen */
@@ -1102,7 +1172,7 @@ function updateLevelPicker() {
   const cont = document.getElementById('lvl-picker-content');
   cont.innerHTML = '';
 
-  // ── Top row: title + back to menu ──
+  // ── Top row ──
   const topRow = document.createElement('div');
   topRow.className = 'sheet-top-row';
   const title = document.createElement('h2');
@@ -1115,84 +1185,85 @@ function updateLevelPicker() {
   topRow.appendChild(backBtn);
   cont.appendChild(topRow);
 
-  // ── Overall progress pill ──
+  // ── Hero progress banner ──
   const totalDone = solved.size;
   const total = LEVEL_META.length;
-  const pill = document.createElement('div');
-  pill.className = 'path-progress-pill';
-  pill.innerHTML = `
-    <div class="path-progress-text"><span>${totalDone}</span> / ${total}</div>
+  const hero = document.createElement('div');
+  hero.className = 'path-hero';
+  hero.innerHTML = `
+    <div class="path-hero-title">A tua aventura</div>
+    <div class="path-hero-count">${totalDone} <span>/ ${total} ilhas</span></div>
     <div class="path-bar-wrap"><div class="path-bar-fill" style="width:${(totalDone/total)*100}%"></div></div>
   `;
-  cont.appendChild(pill);
+  cont.appendChild(hero);
 
-  // Tropical island names per difficulty section
-  const ISLAND_NAMES = [
-    { name: 'Praia',   sub: 'Primeiros passos' },
-    { name: 'Lagoa',   sub: 'Areias tranquilas' },
-    { name: 'Baía',    sub: 'Águas cristalinas' },
-    { name: 'Selva',   sub: 'Palmeiras densas' },
-    { name: 'Vulcão',  sub: 'Terreno acidentado' },
-    { name: 'Pico',    sub: 'Ventos selvagens' },
-    { name: 'Paraíso', sub: 'Apenas os melhores chegam' },
+  // Island story data
+  const ISLANDS = [
+    { name: 'Praia',    icon: '🏖️',  story: 'O calor da areia sob os teus pés. A aventura começa aqui.',          color: '#56a87a', bg: '#e8f8ee' },
+    { name: 'Lagoa',    icon: '🌊',  story: 'Águas calmas escondem segredos. Mergulha fundo.',                      color: '#5a9fd4', bg: '#e5f2ff' },
+    { name: 'Baía',     icon: '🐚',  story: 'O vento muda de direção. O horizonte alarga-se.',                     color: '#9b7bb8', bg: '#f3eaff' },
+    { name: 'Selva',    icon: '🌿',  story: 'Cada passo é um enigma. A floresta densa testa-te.',                  color: '#48a068', bg: '#e0f5e8' },
+    { name: 'Vulcão',   icon: '🌋',  story: 'O chão treme sob os teus pés. Só os fortes avançam.',                color: '#c86040', bg: '#fff0e8' },
+    { name: 'Pico',     icon: '⛰️',  story: 'O frio corta como uma lâmina. A vista compensa tudo.',               color: '#7890c0', bg: '#e8eeff' },
+    { name: 'Paraíso',  icon: '🌺',  story: 'Poucos chegam até aqui. Mereces realmente estar?',                    color: '#c060a0', bg: '#ffe8f5' },
   ];
 
-  // Colors per difficulty section
-  const SECTION_COLORS = [
-    { color: '#56a87a', bg: '#c3f0c8' },
-    { color: '#5a9fd4', bg: '#c5e3ff' },
-    { color: '#9b7bb8', bg: '#ead5ff' },
-    { color: '#e07060', bg: '#ffe2c5' },
-    { color: '#c8a030', bg: '#fff0a0' },
-    { color: '#e08898', bg: '#ffd6e0' },
-    { color: '#7b6abf', bg: '#d5d0ff' },
-  ];
-
-  // ── Path ──
+  // ── Island cards ──
   let idx = 0;
   DIFFS.forEach((d, di) => {
-    const sc = SECTION_COLORS[di] || SECTION_COLORS[0];
+    const island = ISLANDS[di] || { name: d.label, icon: '🗺️', story: '', color: '#9b7bb8', bg: '#f3eaff' };
     const isLast = di === DIFFS.length - 1;
 
     let doneCount = 0;
     for (let i = 0; i < d.count; i++) { if (solved.has(idx + i)) doneCount++; }
 
-    const section = document.createElement('div');
-    section.className = 'path-section';
-
-    // Spine: node + line
-    const spine = document.createElement('div');
-    spine.className = 'path-spine';
-    const node = document.createElement('div');
-    node.className = 'path-node';
-    node.style.setProperty('--node-color', sc.color);
-    node.style.background = doneCount === d.count ? sc.color : sc.bg;
-    node.style.borderColor = sc.color;
-    spine.appendChild(node);
-    if (!isLast) {
-      const line = document.createElement('div');
-      line.className = 'path-line';
-      spine.appendChild(line);
+    // Connector between cards
+    if (di > 0) {
+      const conn = document.createElement('div');
+      conn.className = 'path-connector';
+      cont.appendChild(conn);
     }
 
-    // Body: label + level circles
-    const body = document.createElement('div');
-    body.className = 'path-body';
+    // Card
+    const card = document.createElement('div');
+    card.className = 'path-card';
+    card.style.setProperty('--card-color', island.color);
+    card.style.setProperty('--card-bg', island.bg);
+    card.style.borderColor = island.color + '55';
+    card.style.background = island.bg;
 
-    const lbl = document.createElement('div');
-    lbl.className = 'path-section-label';
-    const island = ISLAND_NAMES[di] || { name: d.label, sub: '' };
-    lbl.textContent = `${island.name} · ${d.size}×${d.size}`;
+    // Header row: icon + name + grid size badge
+    const header = document.createElement('div');
+    header.className = 'path-card-header';
+    header.innerHTML = `
+      <div class="path-card-icon">${island.icon}</div>
+      <div class="path-card-meta">
+        <div class="path-card-name">${island.name}</div>
+        <div class="path-card-grid-label">${d.size}×${d.size} · ${d.label}</div>
+      </div>
+      <div class="path-card-badge">${doneCount}/${d.count}</div>
+    `;
+    card.appendChild(header);
 
-    const sub = document.createElement('div');
-    sub.className = 'path-section-sub';
-    sub.textContent = `${island.sub} · ${doneCount}/${d.count} ilhas`;
+    // Story text
+    const story = document.createElement('div');
+    story.className = 'path-card-story';
+    story.textContent = `"${island.story}"`;
+    card.appendChild(story);
 
+    // Progress bar
+    const prog = document.createElement('div');
+    prog.className = 'path-card-progress';
+    const pct = doneCount / d.count * 100;
+    prog.innerHTML = `
+      <div class="path-card-bar-wrap"><div class="path-card-bar-fill" style="width:${pct}%"></div></div>
+      <div class="path-card-prog-text">${Math.round(pct)}%</div>
+    `;
+    card.appendChild(prog);
+
+    // Level dots grid
     const grid = document.createElement('div');
     grid.className = 'path-lvl-grid';
-    grid.style.setProperty('--node-color', sc.color);
-    grid.style.setProperty('--node-bg', sc.bg);
-
     for (let i = 0; i < d.count; i++) {
       const btn = document.createElement('button');
       btn.className = 'path-lvl-btn';
@@ -1204,13 +1275,17 @@ function updateLevelPicker() {
       grid.appendChild(btn);
       idx++;
     }
+    card.appendChild(grid);
 
-    body.appendChild(lbl);
-    body.appendChild(sub);
-    body.appendChild(grid);
-    section.appendChild(spine);
-    section.appendChild(body);
-    cont.appendChild(section);
+    // Completed banner
+    if (doneCount === d.count) {
+      const banner = document.createElement('div');
+      banner.className = 'path-card-complete-banner';
+      banner.textContent = '✓ Ilha conquistada';
+      card.appendChild(banner);
+    }
+
+    cont.appendChild(card);
   });
 }
 
