@@ -359,20 +359,16 @@ footer {
 
 <!-- Menu screen -->
 <div id="menu-screen">
-  <div class="menu-logo">🟪</div>
   <div class="menu-title">Bumi</div>
   <p class="menu-sub">Divide a grelha em retângulos. Cada um contém exatamente um número.</p>
   <div class="menu-how">
     <div class="menu-how-item">
-      <span class="menu-how-icon">✏️</span>
       <span class="menu-how-text"><strong>Desenha</strong> retângulos arrastando o dedo</span>
     </div>
     <div class="menu-how-item">
-      <span class="menu-how-icon">🔢</span>
       <span class="menu-how-text"><strong>Cada número</strong> indica a área do retângulo</span>
     </div>
     <div class="menu-how-item">
-      <span class="menu-how-icon">💡</span>
       <span class="menu-how-text"><strong>Completa níveis</strong> para ganhar hints</span>
     </div>
   </div>
@@ -387,7 +383,7 @@ footer {
   <div class="menu-btns">
     <button class="menu-play" onclick="startGame()">Jogar →</button>
     <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
-    <button class="menu-train-btn" onclick="startTraining()">🎓 Modo Treino</button>
+    <button class="menu-train-btn" onclick="startTraining()">Modo Treino</button>
   </div>
 </div>
 
@@ -409,7 +405,7 @@ footer {
   <div class="btn-row">
     <button class="btn" onclick="doUndo()"><span class="icon">↩</span>Undo</button>
     <button class="btn" onclick="doClear()"><span class="icon">✕</span>Clear</button>
-    <button class="btn" id="btn-hint" onclick="doHint()"><span class="icon">💡</span><span id="hint-label">Hint · 3</span></button>
+    <button class="btn" id="btn-hint" onclick="doHint()"><span class="icon">?</span><span id="hint-label">Hint · 3</span></button>
     <button class="btn" onclick="openLevels()"><span class="icon">⊞</span>Levels</button>
   </div>
   <button class="btn-wide" id="btn-next" onclick="nextLvl()">Next Level →</button>
@@ -419,10 +415,9 @@ footer {
 <div class="overlay" id="win-overlay" onclick="closeIfBg(event,'win-overlay')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="win-emoji">🎉</div>
     <h2 style="text-align:center">Puzzle Solved!</h2>
     <p class="sub" id="win-sub" style="text-align:center">Level 1 · Easy</p>
-    <div id="hint-reward" style="display:none;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;color:#9b7bb8;">💡 +1 Hint earned!</div>
+    <div id="hint-reward" style="display:none;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;color:#9b7bb8;">+1 Hint earned!</div>
     <div class="win-actions">
       <button class="btn-secondary" onclick="closeOverlay('win-overlay')">Review</button>
       <button class="btn-wide" onclick="nextLvlFromWin()">Next Level →</button>
