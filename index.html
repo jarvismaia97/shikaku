@@ -744,7 +744,7 @@ document.getElementById('grid').addEventListener('pointerup', e => {
   const p = previewCoords();
   const isTap = p.r2-p.r1 === 1 && p.c2-p.c1 === 1;
 
-  if (isTap && onRect >= 0 && !placed[onRect].auto) {
+  if (isTap && onRect >= 0) {
     placed.splice(onRect, 1);
   } else {
     tryPlace(p.r1, p.c1, p.r2, p.c2);
@@ -765,15 +765,12 @@ document.getElementById('grid').addEventListener('pointercancel', () => {
 
 // ─── Controls ─────────────────────────────────────────────────────────────────
 function doUndo() {
-  for (let i = placed.length - 1; i >= 0; i--) {
-    if (!placed[i].auto) { placed.splice(i, 1); break; }
-  }
+  placed.pop();
   updateCells();
 }
 
 function doClear() {
-  placed = placed.filter(r => r.auto);
-  colorN = placed.length;
+  placed = []; colorN = 0;
   updateCells();
 }
 
@@ -812,12 +809,6 @@ function loadLvl(idx) {
   document.getElementById('lvl-diff').textContent = `${m.label} · ${m.size}×${m.size}`;
   document.getElementById('btn-next').classList.remove('show');
   renderGrid();
-  // Auto-place area-1 rects (trivially forced, no clue shown)
-  for (const sol of lvl.solution) {
-    if (sol.area === 1) {
-      placed.push({ r1: sol.r1, c1: sol.c1, r2: sol.r2, c2: sol.c2, ci: colorN++, auto: true });
-    }
-  }
   updateCells();
   closeOverlay('lvl-overlay');
 }
