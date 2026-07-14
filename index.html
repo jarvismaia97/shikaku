@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Bumi</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  user-select: none; -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
 :root {
   --bg: #faf4fb;
   --surface: #ffffff;
@@ -22,6 +26,8 @@ body {
   flex-direction: column;
   align-items: center;
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-y;
 }
 header {
   width: 100%;
@@ -1522,6 +1528,24 @@ function setTheme(name, el) {
   if (el) el.classList.add('active');
   localStorage.setItem('bumi-theme', name);
 }
+
+// ─── Block browser gestures that break gameplay ───────────────────────────────
+// Pinch-zoom (multi-touch)
+document.addEventListener('touchmove', e => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+// Safari gesture events
+document.addEventListener('gesturestart',  e => e.preventDefault(), { passive: false });
+document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
+// Context menu (long-press)
+document.addEventListener('contextmenu', e => e.preventDefault());
+// Double-tap zoom
+let _lastTap = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - _lastTap < 300) e.preventDefault();
+  _lastTap = now;
+}, { passive: false });
 
 // ─── Resize handler ───────────────────────────────────────────────────────────
 window.addEventListener('resize', applyGridSize);
