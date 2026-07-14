@@ -773,7 +773,7 @@ function genLevel(seed, size, maxArea) {
     const area = rows*cols;
     const canH = rows >= 2, canV = cols >= 2;
 
-    if (area <= maxArea) {
+    if (area <= maxArea && area <= 14) {
       const keep = area <= 2 ? 0.88 : area <= 4 ? 0.70 : 0.50;
       if (rng.next() < keep || (!canH && !canV)) {
         rects.push({ r1, c1, r2, c2, area, cr: rng.int(r1, r2-1), cc: rng.int(c1, c2-1) });
@@ -1688,7 +1688,7 @@ function loadInfinite() {
   const seed = Date.now() ^ (infiniteCount * 0x9e3779b9);
   const sizes = [5, 6, 7, 8];
   const size = sizes[infiniteCount % sizes.length];
-  lvl = genLevel(seed, size, 9);
+  lvl = genLevel(seed, size, 14);
   placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
   document.getElementById('lvl-n').textContent = '∞';
   document.getElementById('lvl-diff').textContent = `Infinito · #${infiniteCount + 1} · ${size}×${size}`;
