@@ -76,11 +76,12 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   aspect-ratio: 1;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
 }
 .cell.preview { background: rgba(155, 123, 184, 0.18); }
 .cell.preview-bad { background: rgba(220, 80, 120, 0.18); }
-.cell.r-placed { background: var(--rc, #e0e0e0); }
-.cell.r-correct { background: var(--rc, #c8e6c9); }
+.cell.r-placed { background: rgba(120, 100, 160, 0.06); }
+.cell.r-correct { background: var(--rc, #e8d5ff); }
 
 /* Rectangle borders */
 .cell.bt { border-top:    2.5px solid var(--rb, #444); }
@@ -568,6 +569,7 @@ function renderGrid() {
   const { size } = lvl;
   g.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
 
+  g.style.gridTemplateRows = `repeat(${size}, 1fr)`;
   const fs = size >= 10 ? '11px' : size >= 9 ? '12px' : size >= 8 ? '13px' : size >= 7 ? '14px' : '17px';
 
   for (let r = 0; r < size; r++) {
@@ -579,7 +581,7 @@ function renderGrid() {
       div.dataset.c = c;
       div.style.fontSize = fs;
       const cl = clueAt(r, c);
-      if (cl) div.textContent = cl.v;
+      if (cl && cl.v > 1) div.textContent = cl.v;
       g.appendChild(div);
       cellEls[r][c] = div;
     }
@@ -609,14 +611,17 @@ function updateCells() {
   for (const rect of placed) {
     const { r1, c1, r2, c2, ci } = rect;
     const ok = rectOk(rect);
-    const cls = ok ? 'r-correct' : 'r-placed';
     const bg = BG_PAL[ci % BG_PAL.length];
     const bd = BD_PAL[ci % BD_PAL.length];
     for (let r = r1; r < r2; r++) {
       for (let c = c1; c < c2; c++) {
         const el = cellEls[r][c];
-        el.classList.add(cls);
-        el.style.setProperty('--rc', bg);
+        if (ok) {
+          el.classList.add('r-correct');
+          el.style.setProperty('--rc', bg);
+        } else {
+          el.classList.add('r-placed');
+        }
         el.style.setProperty('--rb', bd);
         if (r === r1)   el.classList.add('bt');
         if (r === r2-1) el.classList.add('bb');
@@ -726,7 +731,7 @@ document.getElementById('grid').addEventListener('pointerup', e => {
   const p = previewCoords();
   const isTap = p.r2-p.r1 === 1 && p.c2-p.c1 === 1;
 
-  if (isTap && onRect >= 0) {
+  if (isTap && onRect >= 0 && !placed[onRect].auto) {
     placed.splice(onRect, 1);
   } else {
     tryPlace(p.r1, p.c1, p.r2, p.c2);
@@ -747,12 +752,15 @@ document.getElementById('grid').addEventListener('pointercancel', () => {
 
 // ─── Controls ─────────────────────────────────────────────────────────────────
 function doUndo() {
-  placed.pop();
+  for (let i = placed.length - 1; i >= 0; i--) {
+    if (!placed[i].auto) { placed.splice(i, 1); break; }
+  }
   updateCells();
 }
 
 function doClear() {
-  placed = []; colorN = 0;
+  placed = placed.filter(r => r.auto);
+  colorN = placed.length;
   updateCells();
 }
 
@@ -791,6 +799,12 @@ function loadLvl(idx) {
   document.getElementById('lvl-diff').textContent = `${m.label} · ${m.size}×${m.size}`;
   document.getElementById('btn-next').classList.remove('show');
   renderGrid();
+  // Auto-place area-1 rects (trivially forced, no clue shown)
+  for (const sol of lvl.solution) {
+    if (sol.area === 1) {
+      placed.push({ r1: sol.r1, c1: sol.c1, r2: sol.r2, c2: sol.c2, ci: colorN++, auto: true });
+    }
+  }
   updateCells();
   closeOverlay('lvl-overlay');
 }
