@@ -648,6 +648,7 @@ function genLevel(seed, size, maxArea) {
 
 // ─── Level config ─────────────────────────────────────────────────────────────
 const DIFFS = [
+  { label: 'Easy',   size: 4,  maxArea: 6,  count: 15 },
   { label: 'Easy',   size: 5,  maxArea: 8,  count: 15 },
   { label: 'Easy',   size: 6,  maxArea: 9,  count: 15 },
   { label: 'Medium', size: 7,  maxArea: 9,  count: 20 },
@@ -1053,7 +1054,7 @@ function loadLvl(idx) {
 }
 
 function nextLvl() {
-  if (curLvl < 99) loadLvl(curLvl + 1);
+  if (curLvl < LEVEL_META.length - 1) loadLvl(curLvl + 1);
 }
 
 function nextLvlFromWin() {
@@ -1106,8 +1107,9 @@ function updateLevelPicker() {
 
   // Tropical island names per difficulty section
   const ISLAND_NAMES = [
-    { name: 'Praia',   sub: 'Areias tranquilas' },
-    { name: 'Lagoa',   sub: 'Águas cristalinas' },
+    { name: 'Praia',   sub: 'Primeiros passos' },
+    { name: 'Lagoa',   sub: 'Areias tranquilas' },
+    { name: 'Baía',    sub: 'Águas cristalinas' },
     { name: 'Selva',   sub: 'Palmeiras densas' },
     { name: 'Vulcão',  sub: 'Terreno acidentado' },
     { name: 'Pico',    sub: 'Ventos selvagens' },
@@ -1122,6 +1124,7 @@ function updateLevelPicker() {
     { color: '#e07060', bg: '#ffe2c5' },
     { color: '#c8a030', bg: '#fff0a0' },
     { color: '#e08898', bg: '#ffd6e0' },
+    { color: '#7b6abf', bg: '#d5d0ff' },
   ];
 
   // ── Path ──
