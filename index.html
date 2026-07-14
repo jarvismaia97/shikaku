@@ -78,13 +78,25 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   position: relative;
   color: var(--text);
   transition: background 0.08s;
-  overflow: hidden;
   border: 1px solid transparent;
 }
 .cell.preview { background: rgba(155, 123, 184, 0.18); }
 .cell.preview-bad { background: rgba(220, 80, 120, 0.18); }
 .cell.r-placed { background: rgba(120, 100, 160, 0.06); }
-.cell.r-correct { background: var(--rc, #e8d5ff); }
+
+/* Correct rect: solid fill that bleeds into the 1px gaps — no grid lines visible */
+.cell.r-correct {
+  background: transparent;
+  isolation: isolate;
+  z-index: 0;
+}
+.cell.r-correct::after {
+  content: '';
+  position: absolute;
+  inset: -1px;        /* bleed 1px in every direction to cover the gap */
+  background: var(--rc, #e8d5ff);
+  z-index: -1;        /* behind the number text, above the grid background */
+}
 
 /* Rectangle borders */
 .cell.bt { border-top:    2.5px solid var(--rb, #444); }
@@ -1034,15 +1046,15 @@ function updateCells() {
         if (ok) {
           el.classList.add('r-correct');
           el.style.setProperty('--rc', bg);
-          el.style.setProperty('--rb', bd);
+          // no borders — ::after fills seamlessly including the 1px gaps
         } else {
           el.classList.add('r-placed');
           el.style.setProperty('--rb', '#c8c0d0');
+          if (r === r1)   el.classList.add('bt');
+          if (r === r2-1) el.classList.add('bb');
+          if (c === c1)   el.classList.add('bl');
+          if (c === c2-1) el.classList.add('br');
         }
-        if (r === r1)   el.classList.add('bt');
-        if (r === r2-1) el.classList.add('bb');
-        if (c === c1)   el.classList.add('bl');
-        if (c === c2-1) el.classList.add('br');
       }
     }
   }
