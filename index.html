@@ -127,6 +127,32 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
 }
 .cell.r-undo { pointer-events: none; animation: undoFade 0.18s ease-in forwards; }
 
+/* ─── Azulejo info toast ──────────────────────────────────────────────────── */
+.az-toast {
+  position: fixed; bottom: 110px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 6px 28px rgba(0,0,0,.18);
+  padding: 12px 14px; width: 330px; max-width: calc(100vw - 32px);
+  display: flex; gap: 12px; align-items: flex-start;
+  opacity: 0; transition: opacity .3s, transform .3s;
+  pointer-events: none; z-index: 300;
+  border: 1.5px solid #d8e6f8;
+}
+.az-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.az-tile-preview {
+  width: 52px; height: 52px; flex-shrink: 0;
+  border-radius: 8px; border: 2px solid #1a3a70;
+  background: #f5f0e8;
+  background-image: var(--rp, none);
+  background-size: 100% 100%;
+}
+.az-body { min-width: 0; }
+.az-toast-name { font-weight: 800; font-size: 12.5px; color: #1a3a70; line-height: 1.3; }
+.az-toast-loc  { font-size: 11px; color: #5a7ab0; margin: 3px 0 2px; }
+.az-toast-meta { font-size: 10.5px; color: #999; }
+.az-toast-fact { font-size: 11px; color: #444; margin-top: 5px; line-height: 1.45; }
+
 /* Rectangle borders (unconfirmed) */
 .cell.bt { border-top:    2.5px solid var(--rb, #444); }
 .cell.bb { border-bottom: 2.5px solid var(--rb, #444); }
@@ -1786,19 +1812,56 @@ document.addEventListener('touchend', e => {
 // ─── Resize handler ───────────────────────────────────────────────────────────
 window.addEventListener('resize', applyGridSize);
 
+// ─── Azulejo lore ─────────────────────────────────────────────────────────────
+const AZULEJO_LORE = [
+  { name: 'São Bento · Chegada do Comboio', loc: 'Estação de São Bento, Porto', meta: 'Jorge Colaço · 1905–1916', fact: 'São 20 000 azulejos pintados à mão. Retratam a chegada do primeiro comboio a Portugal, a Batalha de Valdevez e cenas da vida rural nortenha.' },
+  { name: 'Grande Panorama de Lisboa', loc: 'Museu Nacional do Azulejo, Lisboa', meta: 'Anónimo · c. 1700', fact: 'Painel de 23 metros que mostra Lisboa antes do terramoto de 1755. É uma das maiores e mais valiosas representações históricas da cidade.' },
+  { name: 'Fachada da Igreja do Carmo', loc: 'Igreja do Carmo, Porto', meta: 'Silvestre Silvestri · 1912', fact: 'Uma das fachadas de azulejo mais fotografadas do mundo. Retrata a fundação e a história da Ordem Carmelita com 1 600 azulejos.' },
+  { name: 'Estação de Pinhão · Colheita do Vinho', loc: 'Estação de Pinhão, Vale do Douro', meta: 'João Pinto · 1937', fact: 'Painéis que retratam a vindima e a vida ribeirinha no Douro. A estação é considerada uma das mais belas do mundo.' },
+  { name: 'Palácio do Marquês de Fronteira', loc: 'Benfica, Lisboa', meta: 'Anónimo · séc. XVII', fact: 'Jardim com azulejos que representam batalhas da Restauração e figuras alegóricas. Os azulejos da "sala das batalhas" são únicos na Europa.' },
+  { name: 'Igreja de São Lourenço de Almancil', loc: 'Almancil, Algarve', meta: 'João Antunes · c. 1730', fact: 'Interior completamente revestido de azulejos barrocos azuis e brancos. É considerada a "Sistina do Algarve" pela exuberância dos painéis.' },
+  { name: 'Azulejos do Canal · Palácio de Queluz', loc: 'Palácio Nacional de Queluz, Sintra', meta: 'Anónimo · séc. XVIII', fact: 'Revestem o canal que atravessa o jardim. Cenas de barcos, figuras mitológicas e paisagens são banhadas por água real que ainda corre no canal.' },
+  { name: 'Estação de Aveiro · Moliceiros', loc: 'Estação de Aveiro, Aveiro', meta: 'Jorge Colaço · 1916', fact: 'Painéis que mostram as salinas, os moliceiros e as rendilheiras de Aveiro. A estação foi considerada uma das mais bonitas de Portugal.' },
+  { name: 'Convento da Madre de Deus', loc: 'Museu Nacional do Azulejo, Lisboa', meta: 'Anónimo · séc. XVI–XVIII', fact: 'Alberga a maior coleção de azulejos do mundo. O edifício tem mais de 500 anos e os seus azulejos são considerados Tesouro Nacional.' },
+  { name: 'Azulejos Mourisco · Palácio de Sintra', loc: 'Palácio Nacional de Sintra, Sintra', meta: 'Anónimo · séc. XV–XVI', fact: 'Alguns dos mais antigos azulejos de Portugal, com influência moura. O padrão geométrico "sem fim" simboliza o infinito e a eternidade.' },
+  { name: 'Quinta da Regaleira · Art Nouveau', loc: 'Quinta da Regaleira, Sintra', meta: 'Luigi Manini · 1904–1910', fact: 'Azulejos art nouveau decoram salas com temas alquímicos e maçónicos. A quinta é Património da Humanidade da UNESCO desde 1995.' },
+  { name: 'Igreja de Santa Catarina dos Grilos', loc: 'Porto', meta: 'Anónimo · séc. XVIII', fact: 'Interior revestido de azulejos barrocos com cenas da vida de Santa Catarina. O apelido "dos Grilos" vem dos grilos que abundavam no terreno.' },
+  { name: 'Palácio da Pena · Romantismo', loc: 'Palácio da Pena, Sintra', meta: 'Anónimo · séc. XIX', fact: 'Azulejos do período romântico com motivos mouriscos e manuelinos. O palácio foi mandado construir pelo Rei D. Fernando II, artista e arquiteto.' },
+  { name: 'Jardim do Torel · Art Déco', loc: 'Jardim do Torel, Lisboa', meta: 'Anónimo · c. 1930', fact: 'Bancos e paredes em azulejo art déco com vistas panorâmicas sobre Lisboa. O jardim foi local de tertúlias literárias no século XX.' },
+  { name: 'Igreja dos Congregados · Fachada', loc: 'Igreja de Santo António dos Congregados, Porto', meta: 'Anónimo · séc. XVIII', fact: 'Fachada azul e branca que contrasta com a Torre dos Clérigos ao fundo. É um dos cenários mais icónicos da Praça da Batalha no Porto.' },
+  { name: 'Solar dos Condes de Resende', loc: 'Museu do Azulejo, Lisboa', meta: 'Anónimo · c. 1660', fact: 'Painel com caçada a cavalo, um dos mais antigos exemplos narrativos em azulejo português. Influenciado pelos azulejos flamengos do século XVII.' },
+];
+
+let _azToastTimer = null;
+function showAzulejoToast(ci) {
+  const lore = AZULEJO_LORE[ci % AZULEJO_LORE.length];
+  const pat  = AZULEJO_PATS[ci % AZULEJO_PATS.length];
+  const toast = document.getElementById('az-toast');
+  const preview = document.getElementById('az-tile-preview');
+  document.getElementById('az-toast-name').textContent = lore.name;
+  document.getElementById('az-toast-loc').textContent  = '📍 ' + lore.loc;
+  document.getElementById('az-toast-meta').textContent = lore.meta;
+  document.getElementById('az-toast-fact').textContent = lore.fact;
+  preview.style.backgroundImage = pat;
+  clearTimeout(_azToastTimer);
+  toast.classList.add('show');
+  _azToastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+}
+
 // ─── Animate correct rect ─────────────────────────────────────────────────────
 function animateCorrectRect(rect) {
-  const { r1, c1, r2, c2 } = rect;
+  const { r1, c1, r2, c2, ci } = rect;
   for (let r = r1; r < r2; r++) {
     for (let c = c1; c < c2; c++) {
       const el = document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
       if (!el) continue;
       el.classList.remove('r-pop');
-      void el.offsetWidth; // reflow to restart animation
+      void el.offsetWidth;
       el.classList.add('r-pop');
       el.addEventListener('animationend', () => el.classList.remove('r-pop'), { once: true });
     }
   }
+  if (!colorblindMode) showAzulejoToast(ci);
 }
 
 // ─── Infinite mode ────────────────────────────────────────────────────────────
@@ -1847,5 +1910,17 @@ loadLvl(0);
 updateHintBtn();
 updateDailyBtn();
 </script>
+
+<!-- Azulejo info toast -->
+<div id="az-toast" class="az-toast">
+  <div class="az-tile-preview" id="az-tile-preview"></div>
+  <div class="az-body">
+    <div class="az-toast-name" id="az-toast-name"></div>
+    <div class="az-toast-loc" id="az-toast-loc"></div>
+    <div class="az-toast-meta" id="az-toast-meta"></div>
+    <div class="az-toast-fact" id="az-toast-fact"></div>
+  </div>
+</div>
+
 </body>
 </html>
