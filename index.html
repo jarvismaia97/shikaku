@@ -96,8 +96,9 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   content: '';
   position: absolute;
   inset: -2px;
-  background: var(--rc, #e8d5ff);
+  background: var(--rc, #f5f0e8);
   background-image: var(--rp, none);
+  background-size: 100% 100%;
   z-index: -1;
 }
 /* Elevated colored border on outer edges of correct rects */
@@ -977,6 +978,33 @@ let colorblindMode = JSON.parse(localStorage.getItem('bumi-cb') || 'false');
 // ─── Haptic ───────────────────────────────────────────────────────────────────
 function haptic(p) { if (navigator.vibrate) navigator.vibrate(p); }
 
+// ─── Azulejo patterns ─────────────────────────────────────────────────────────
+// Each correct rect reveals an azulejo tile (blue or terracotta on cream)
+function svgUrl(s) { return `url("data:image/svg+xml,${encodeURIComponent(s)}")`; }
+const _AZ = [
+  // Cruz (cross + center dot)
+  c=>`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect fill="rgba(${c},.27)" x="11" y="0" width="2" height="24"/><rect fill="rgba(${c},.27)" x="0" y="11" width="24" height="2"/><circle fill="rgba(${c},.54)" cx="12" cy="12" r="3.5"/></svg>`,
+  // Losango (hollow diamond)
+  c=>`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="rgba(${c},.42)" fill-rule="evenodd" d="M12,1L23,12L12,23L1,12ZM12,7L17,12L12,17L7,12Z"/></svg>`,
+  // Quatrefoil (4 corner arcs — diamond gap in centre)
+  c=>`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle fill="rgba(${c},.34)" cx="0" cy="0" r="13"/><circle fill="rgba(${c},.34)" cx="24" cy="0" r="13"/><circle fill="rgba(${c},.34)" cx="0" cy="24" r="13"/><circle fill="rgba(${c},.34)" cx="24" cy="24" r="13"/></svg>`,
+  // Círculos (concentric rings)
+  c=>`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle fill="none" stroke="rgba(${c},.37)" stroke-width="1.5" cx="12" cy="12" r="9"/><circle fill="none" stroke="rgba(${c},.26)" stroke-width="1" cx="12" cy="12" r="5"/><circle fill="rgba(${c},.54)" cx="12" cy="12" r="2.5"/></svg>`,
+  // Estrela de 8 pontas (8-pointed star)
+  c=>`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><polygon fill="rgba(${c},.42)" points="12,2 13.7,7.8 19.1,4.9 16.2,10.3 22,12 16.2,13.7 19.1,19.1 13.7,16.2 12,22 10.3,16.2 4.9,19.1 7.8,13.7 2,12 7.8,10.3 4.9,4.9 10.3,7.8"/></svg>`,
+  // Trellis (diagonal X + dots)
+  c=>`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><line x1="0" y1="0" x2="24" y2="24" stroke="rgba(${c},.32)" stroke-width="2"/><line x1="24" y1="0" x2="0" y2="24" stroke="rgba(${c},.32)" stroke-width="2"/><circle fill="rgba(${c},.48)" cx="0" cy="0" r="2.5"/><circle fill="rgba(${c},.48)" cx="24" cy="0" r="2.5"/><circle fill="rgba(${c},.48)" cx="0" cy="24" r="2.5"/><circle fill="rgba(${c},.48)" cx="24" cy="24" r="2.5"/><circle fill="rgba(${c},.52)" cx="12" cy="12" r="2"/></svg>`,
+  // Espinha (herringbone V)
+  c=>`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path stroke="rgba(${c},.4)" stroke-width="2.5" fill="none" d="M0,12L12,0L24,12"/><path stroke="rgba(${c},.4)" stroke-width="2.5" fill="none" d="M0,24L12,12L24,24"/></svg>`,
+  // Flor (4 ellipse petals + centre)
+  c=>`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><ellipse fill="rgba(${c},.33)" cx="12" cy="6" rx="4" ry="6"/><ellipse fill="rgba(${c},.33)" cx="12" cy="18" rx="4" ry="6"/><ellipse fill="rgba(${c},.33)" cx="6" cy="12" rx="6" ry="4"/><ellipse fill="rgba(${c},.33)" cx="18" cy="12" rx="6" ry="4"/><circle fill="rgba(${c},.58)" cx="12" cy="12" r="3"/></svg>`,
+];
+// 16 patterns: 8 blue + 8 terracotta (alternating)
+const AZULEJO_PATS = _AZ.flatMap(f => [
+  svgUrl(f('20,55,130')),   // azul português
+  svgUrl(f('148,45,22')),   // terracota
+]);
+
 // ─── Tutorial ─────────────────────────────────────────────────────────────────
 const TUTORIAL_LEVEL = {
   size: 3,
@@ -1185,13 +1213,19 @@ function updateCells() {
         const el = cellEls[r][c];
         if (ok) {
           el.classList.add('r-correct');
-          el.style.setProperty('--rc', bg);
-          el.style.setProperty('--rb', bd);
+          if (colorblindMode) {
+            el.style.setProperty('--rc', bg);
+            el.style.setProperty('--rb', bd);
+            el.style.setProperty('--rp', PATTERNS[ci % PATTERNS.length]);
+          } else {
+            el.style.setProperty('--rc', '#f5f0e8');
+            el.style.setProperty('--rb', '#1a3a70');
+            el.style.setProperty('--rp', AZULEJO_PATS[ci % AZULEJO_PATS.length]);
+          }
           if (r === r1)   el.classList.add('bt');
           if (r === r2-1) el.classList.add('bb');
           if (c === c1)   el.classList.add('bl');
           if (c === c2-1) el.classList.add('br');
-          if (colorblindMode) el.style.setProperty('--rp', PATTERNS[ci % PATTERNS.length]);
         } else {
           el.classList.add('r-placed');
           el.style.setProperty('--rb', bd);
