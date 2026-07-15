@@ -86,7 +86,7 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
 .cell.preview-bad { background: rgba(220, 80, 120, 0.18); }
 .cell.r-placed { background: rgba(120, 100, 160, 0.06); }
 
-/* Correct rect: solid fill that bleeds into the 1px gaps — no grid lines visible */
+/* Correct rect: solid fill that bleeds into the 1px gaps */
 .cell.r-correct {
   background: transparent;
   isolation: isolate;
@@ -100,15 +100,25 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   background-image: var(--rp, none);
   z-index: -1;
 }
+/* Elevated colored border on outer edges of correct rects */
+.cell.r-correct.bt { border-top:    4px solid var(--rb, #9b7bb8) !important; }
+.cell.r-correct.bb { border-bottom: 4px solid var(--rb, #9b7bb8) !important; }
+.cell.r-correct.bl { border-left:   4px solid var(--rb, #9b7bb8) !important; }
+.cell.r-correct.br { border-right:  4px solid var(--rb, #9b7bb8) !important; }
+/* Glow/shadow on corner cells to sell the elevation */
+.cell.r-correct.bt.bl { box-shadow: -3px -3px 10px var(--rb, rgba(155,123,184,.5)); z-index: 1; }
+.cell.r-correct.bt.br { box-shadow:  3px -3px 10px var(--rb, rgba(155,123,184,.5)); z-index: 1; }
+.cell.r-correct.bb.bl { box-shadow: -3px  3px 10px var(--rb, rgba(155,123,184,.5)); z-index: 1; }
+.cell.r-correct.bb.br { box-shadow:  3px  3px 10px var(--rb, rgba(155,123,184,.5)); z-index: 1; }
 
 /* ─── Animations ──────────────────────────────────────────────────────────── */
 @keyframes rectPop {
   0%   { transform: scale(1); }
-  35%  { transform: scale(1.07); }
-  65%  { transform: scale(0.97); }
+  30%  { transform: scale(1.13); }
+  65%  { transform: scale(0.96); }
   100% { transform: scale(1); }
 }
-.cell.r-correct.r-pop { animation: rectPop 0.28s cubic-bezier(.36,.07,.19,.97); z-index: 1; }
+.cell.r-correct.r-pop { animation: rectPop 0.32s cubic-bezier(.36,.07,.19,.97); z-index: 2; }
 
 @keyframes undoFade {
   0%   { opacity: 1; transform: scale(1); }
@@ -116,7 +126,7 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
 }
 .cell.r-undo { pointer-events: none; animation: undoFade 0.18s ease-in forwards; }
 
-/* Rectangle borders */
+/* Rectangle borders (unconfirmed) */
 .cell.bt { border-top:    2.5px solid var(--rb, #444); }
 .cell.bb { border-bottom: 2.5px solid var(--rb, #444); }
 .cell.bl { border-left:   2.5px solid var(--rb, #444); }
@@ -1176,6 +1186,11 @@ function updateCells() {
         if (ok) {
           el.classList.add('r-correct');
           el.style.setProperty('--rc', bg);
+          el.style.setProperty('--rb', bd);
+          if (r === r1)   el.classList.add('bt');
+          if (r === r2-1) el.classList.add('bb');
+          if (c === c1)   el.classList.add('bl');
+          if (c === c2-1) el.classList.add('br');
           if (colorblindMode) el.style.setProperty('--rp', PATTERNS[ci % PATTERNS.length]);
         } else {
           el.classList.add('r-placed');
