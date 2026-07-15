@@ -425,29 +425,29 @@ footer {
   justify-content: center;
   gap: 0;
   z-index: 200;
-  padding: 20px 28px max(env(safe-area-inset-bottom, 0px), 20px);
-  overflow: hidden;
+  padding: 16px 28px max(env(safe-area-inset-bottom, 0px), 16px);
+  overflow-y: auto;
 }
 #menu-screen.hidden { display: none; }
 .menu-title {
-  font-size: 40px;
+  font-size: 36px;
   font-weight: 800;
   letter-spacing: -1px;
   color: var(--text);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .menu-sub {
   font-size: 13px;
   color: var(--sub);
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   line-height: 1.4;
-  max-width: 240px;
+  max-width: 260px;
 }
 .menu-btns {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 8px;
   width: 100%;
   max-width: 300px;
 }
@@ -456,8 +456,8 @@ footer {
   color: white;
   border: none;
   border-radius: 16px;
-  padding: 16px;
-  font-size: 17px;
+  padding: 14px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   letter-spacing: 0.2px;
@@ -591,8 +591,8 @@ footer {
   justify-content: center;
 }
 .theme-swatch {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: 3px solid transparent;
   cursor: pointer;
@@ -637,7 +637,7 @@ footer {
 <div id="menu-screen">
   <div class="menu-title">Bumi 🌴</div>
   <p class="menu-sub">Divide a grelha em retângulos. Cada um contém exatamente um número.</p>
-  <div class="theme-row" id="theme-row" style="margin-bottom:20px">
+  <div class="theme-row" id="theme-row" style="margin-bottom:14px">
     <button class="theme-swatch active" style="background:#9b7bb8" data-theme="pastel" onclick="setTheme('pastel',this)" title="Lavanda"></button>
     <button class="theme-swatch" style="background:#5a9fd4" data-theme="ocean" onclick="setTheme('ocean',this)" title="Oceano"></button>
     <button class="theme-swatch" style="background:#e07060" data-theme="sunset" onclick="setTheme('sunset',this)" title="Sunset"></button>
@@ -647,11 +647,10 @@ footer {
   <div class="menu-btns">
     <button class="menu-daily-btn" id="daily-menu-btn" onclick="startDaily()">☀️ Desafio Diário</button>
     <button class="menu-play" onclick="startGame()">Jogar →</button>
-    <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
   </div>
-  <div class="menu-secondary-row" style="margin-top:9px">
-    <button class="menu-sec-btn blue" onclick="startInfinite()">∞ Infinito</button>
+  <div class="menu-secondary-row" style="margin-top:8px">
     <button class="menu-sec-btn" onclick="startAndLevels()">⊞ Níveis</button>
+    <button class="menu-sec-btn blue" onclick="startInfinite()">∞ Infinito</button>
     <button class="menu-sec-btn pink" onclick="startTraining()">✏️ Treino</button>
   </div>
 </div>
