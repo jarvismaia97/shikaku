@@ -423,26 +423,17 @@ footer {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: 10px;
   z-index: 200;
-  padding: 16px 28px max(env(safe-area-inset-bottom, 0px), 16px);
-  overflow-y: auto;
+  padding: 0 28px max(env(safe-area-inset-bottom, 0px), 20px);
 }
 #menu-screen.hidden { display: none; }
 .menu-title {
-  font-size: 36px;
+  font-size: 38px;
   font-weight: 800;
   letter-spacing: -1px;
   color: var(--text);
-  margin-bottom: 2px;
-}
-.menu-sub {
-  font-size: 13px;
-  color: var(--sub);
-  text-align: center;
-  margin-bottom: 12px;
-  line-height: 1.4;
-  max-width: 260px;
+  margin: 0;
 }
 .menu-btns {
   display: flex;
@@ -455,17 +446,16 @@ footer {
   background: var(--accent);
   color: white;
   border: none;
-  border-radius: 16px;
-  padding: 14px;
+  border-radius: 14px;
+  padding: 13px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 0.2px;
 }
 .menu-play:active { opacity: 0.8; }
 .menu-secondary-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   width: 100%;
   max-width: 300px;
@@ -475,22 +465,20 @@ footer {
   color: var(--text);
   border: 1.5px solid #e0d4e8;
   border-radius: 14px;
-  padding: 12px 6px;
-  font-size: 12px;
+  padding: 11px 6px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
-  line-height: 1.3;
 }
 .menu-sec-btn:active { opacity: 0.65; }
 .menu-sec-btn.pink { background: #ffd6e0; color: #b03060; border-color: #ffb3c6; }
-.menu-sec-btn.blue { background: linear-gradient(135deg,#e8d5ff,#c5e3ff); color: #5060a0; border-color: #c0b8e8; }
 .menu-daily-btn {
   background: linear-gradient(135deg, #fff8d0, #ffe870);
   color: #8a6000;
   border: 1.5px solid #f0c820;
-  border-radius: 16px;
-  padding: 14px;
+  border-radius: 14px;
+  padding: 13px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -636,8 +624,7 @@ footer {
 <!-- Menu screen -->
 <div id="menu-screen">
   <div class="menu-title">Bumi 🌴</div>
-  <p class="menu-sub">Divide a grelha em retângulos. Cada um contém exatamente um número.</p>
-  <div class="theme-row" id="theme-row" style="margin-bottom:14px">
+  <div class="theme-row" id="theme-row">
     <button class="theme-swatch active" style="background:#9b7bb8" data-theme="pastel" onclick="setTheme('pastel',this)" title="Lavanda"></button>
     <button class="theme-swatch" style="background:#5a9fd4" data-theme="ocean" onclick="setTheme('ocean',this)" title="Oceano"></button>
     <button class="theme-swatch" style="background:#e07060" data-theme="sunset" onclick="setTheme('sunset',this)" title="Sunset"></button>
@@ -648,9 +635,8 @@ footer {
     <button class="menu-daily-btn" id="daily-menu-btn" onclick="startDaily()">☀️ Desafio Diário</button>
     <button class="menu-play" onclick="startGame()">Jogar →</button>
   </div>
-  <div class="menu-secondary-row" style="margin-top:8px">
+  <div class="menu-secondary-row">
     <button class="menu-sec-btn" onclick="startAndLevels()">⊞ Níveis</button>
-    <button class="menu-sec-btn blue" onclick="startInfinite()">∞ Infinito</button>
     <button class="menu-sec-btn pink" onclick="startTraining()">✏️ Treino</button>
   </div>
 </div>
