@@ -67,6 +67,8 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  width: fit-content;
+  height: fit-content;
 }
 .cell {
   background: var(--surface);
@@ -423,52 +425,29 @@ footer {
   justify-content: center;
   gap: 0;
   z-index: 200;
-  padding: 40px 32px max(env(safe-area-inset-bottom, 0px), 40px);
+  padding: 20px 28px max(env(safe-area-inset-bottom, 0px), 20px);
+  overflow: hidden;
 }
 #menu-screen.hidden { display: none; }
-.menu-logo {
-  font-size: 56px;
-  margin-bottom: 8px;
-}
 .menu-title {
-  font-size: 38px;
+  font-size: 40px;
   font-weight: 800;
   letter-spacing: -1px;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 .menu-sub {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--sub);
   text-align: center;
-  margin-bottom: 48px;
-  line-height: 1.5;
-  max-width: 260px;
+  margin-bottom: 16px;
+  line-height: 1.4;
+  max-width: 240px;
 }
-.menu-how {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 48px;
-  width: 100%;
-  max-width: 300px;
-}
-.menu-how-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--surface);
-  border-radius: 14px;
-  padding: 12px 16px;
-  border: 1.5px solid #e0d4e8;
-}
-.menu-how-icon { font-size: 22px; flex-shrink: 0; }
-.menu-how-text { font-size: 13px; color: var(--text); line-height: 1.4; }
-.menu-how-text strong { font-weight: 700; }
 .menu-btns {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
   width: 100%;
   max-width: 300px;
 }
@@ -477,35 +456,35 @@ footer {
   color: white;
   border: none;
   border-radius: 16px;
-  padding: 18px;
+  padding: 16px;
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
   letter-spacing: 0.2px;
 }
 .menu-play:active { opacity: 0.8; }
-.menu-levels-btn {
+.menu-secondary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+}
+.menu-sec-btn {
   background: var(--surface);
   color: var(--text);
   border: 1.5px solid #e0d4e8;
-  border-radius: 16px;
-  padding: 14px;
-  font-size: 15px;
+  border-radius: 14px;
+  padding: 12px 6px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  text-align: center;
+  line-height: 1.3;
 }
-.menu-levels-btn:active { opacity: 0.65; }
-.menu-train-btn {
-  background: #ffd6e0;
-  color: #b03060;
-  border: 1.5px solid #ffb3c6;
-  border-radius: 16px;
-  padding: 14px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.menu-train-btn:active { opacity: 0.65; }
+.menu-sec-btn:active { opacity: 0.65; }
+.menu-sec-btn.pink { background: #ffd6e0; color: #b03060; border-color: #ffb3c6; }
+.menu-sec-btn.blue { background: linear-gradient(135deg,#e8d5ff,#c5e3ff); color: #5060a0; border-color: #c0b8e8; }
 .menu-daily-btn {
   background: linear-gradient(135deg, #fff8d0, #ffe870);
   color: #8a6000;
@@ -658,32 +637,22 @@ footer {
 <div id="menu-screen">
   <div class="menu-title">Bumi 🌴</div>
   <p class="menu-sub">Divide a grelha em retângulos. Cada um contém exatamente um número.</p>
-  <div class="menu-how">
-    <div class="menu-how-item">
-      <span class="menu-how-text"><strong>Desenha</strong> retângulos arrastando o dedo</span>
-    </div>
-    <div class="menu-how-item">
-      <span class="menu-how-text"><strong>Cada número</strong> indica a área do retângulo</span>
-    </div>
-    <div class="menu-how-item">
-      <span class="menu-how-text"><strong>Completa níveis</strong> para ganhar hints</span>
-    </div>
-  </div>
-  <div class="theme-label">Tema</div>
-  <div class="theme-row" id="theme-row">
+  <div class="theme-row" id="theme-row" style="margin-bottom:20px">
     <button class="theme-swatch active" style="background:#9b7bb8" data-theme="pastel" onclick="setTheme('pastel',this)" title="Lavanda"></button>
     <button class="theme-swatch" style="background:#5a9fd4" data-theme="ocean" onclick="setTheme('ocean',this)" title="Oceano"></button>
     <button class="theme-swatch" style="background:#e07060" data-theme="sunset" onclick="setTheme('sunset',this)" title="Sunset"></button>
     <button class="theme-swatch" style="background:#56a87a" data-theme="forest" onclick="setTheme('forest',this)" title="Floresta"></button>
     <button class="theme-swatch" style="background:#4a4a6a" data-theme="dark" onclick="setTheme('dark',this)" title="Escuro"></button>
-    <button class="theme-swatch cb-swatch" id="cb-swatch" onclick="toggleColorblind(this)" title="Daltónico">CB</button>
   </div>
   <div class="menu-btns">
     <button class="menu-daily-btn" id="daily-menu-btn" onclick="startDaily()">☀️ Desafio Diário</button>
     <button class="menu-play" onclick="startGame()">Jogar →</button>
     <button class="menu-levels-btn" onclick="startAndLevels()">⊞ Escolher Nível</button>
-    <button class="menu-infinite-btn" onclick="startInfinite()">∞ Modo Infinito</button>
-    <button class="menu-train-btn" onclick="startTraining()">Modo Treino</button>
+  </div>
+  <div class="menu-secondary-row" style="margin-top:9px">
+    <button class="menu-sec-btn blue" onclick="startInfinite()">∞ Infinito</button>
+    <button class="menu-sec-btn" onclick="startAndLevels()">⊞ Níveis</button>
+    <button class="menu-sec-btn pink" onclick="startTraining()">✏️ Treino</button>
   </div>
 </div>
 
@@ -1321,6 +1290,8 @@ function markWin() {
 
 // ─── Level loading ────────────────────────────────────────────────────────────
 function loadLvl(idx) {
+  dailyMode = false;
+  document.querySelector('.level-num').style.display = '';
   curLvl = idx;
   lvl = getLevel(idx);
   placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
@@ -1560,13 +1531,12 @@ function startDaily() {
   document.getElementById('train-badge').classList.remove('show');
   document.getElementById('daily-badge').classList.add('show');
   document.getElementById('menu-screen').classList.add('hidden');
+  document.querySelector('.level-num').style.display = 'none';
 
   lvl = getDailyLevel();
   curLvl = -2;
   placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
 
-  const d = new Date();
-  document.getElementById('lvl-n').textContent = `${d.getDate()}/${d.getMonth()+1}`;
   document.getElementById('lvl-diff').textContent = 'Desafio Diário';
   document.getElementById('btn-next').classList.remove('show');
   renderGrid();
