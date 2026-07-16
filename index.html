@@ -1448,6 +1448,10 @@ function doHint() {
 
 function markWin() {
   haptic([80, 40, 80]);
+  if (!colorblindMode) {
+    const lvlAzIdx = infiniteMode ? infiniteCount : Math.max(0, curLvl);
+    showAzulejoToast(lvlAzIdx);
+  }
   if (tutActive) {
     setTimeout(tutWin, 350);
     return;
@@ -1878,11 +1882,6 @@ function animateCorrectRect(rect) {
       el.classList.add('r-pop');
       el.addEventListener('animationend', () => el.classList.remove('r-pop'), { once: true });
     }
-  }
-  if (!colorblindMode && !levelToastShown) {
-    levelToastShown = true;
-    const lvlAzIdx = infiniteMode ? infiniteCount : Math.max(0, curLvl);
-    showAzulejoToast(lvlAzIdx);
   }
 }
 
