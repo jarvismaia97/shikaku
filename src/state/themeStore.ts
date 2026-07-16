@@ -19,12 +19,12 @@ export const useThemeStore = create<ThemeState>()(
       toggleColorblind: () => set(s => ({ colorblind: !s.colorblind })),
     }),
     {
-      name: 'bumi-theme-store',
+      name: 'bumi-theme-store-v2',
       storage: createJSONStorage(() => AsyncStorage),
     },
   ),
 );
 
 export function useThemeTokens(): ThemeTokens {
-  return useThemeStore(s => THEMES[s.themeName]);
+  return useThemeStore(s => THEMES[s.themeName] ?? THEMES['roxo']);
 }
