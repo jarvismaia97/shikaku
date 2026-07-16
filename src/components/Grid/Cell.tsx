@@ -12,6 +12,7 @@ export type CellState = 'empty' | 'placed' | 'correct';
 interface CellProps {
   size: number;
   clueValue?: number;
+  clueColor?: string;
   state: CellState;
   edges: CellEdges;
   fillColor?: string;
@@ -21,7 +22,7 @@ interface CellProps {
 const BORDER_W = 2.5;
 const GAP_COLOR = '#f0eaf5';
 
-export function Cell({ size, clueValue, state, edges, fillColor, borderColor }: CellProps) {
+export function Cell({ size, clueValue, clueColor, state, edges, fillColor, borderColor }: CellProps) {
   const bg = state === 'empty' ? '#ffffff' : state === 'correct' ? (fillColor ?? '#f5f0e8') : 'rgba(120,100,160,0.06)';
   const fontSize = size >= 40 ? 17 : size >= 34 ? 14 : size >= 28 ? 12 : 10;
 
@@ -44,7 +45,7 @@ export function Cell({ size, clueValue, state, edges, fillColor, borderColor }: 
         },
       ]}
     >
-      {clueValue != null && <Text style={[styles.clue, { fontSize }]}>{clueValue}</Text>}
+      {clueValue != null && <Text style={[styles.clue, { fontSize, color: clueColor ?? '#3a2d45' }]}>{clueValue}</Text>}
     </View>
   );
 }

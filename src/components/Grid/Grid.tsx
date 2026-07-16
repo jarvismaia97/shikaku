@@ -2,12 +2,12 @@ import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
-import { AzulejoPanel } from '@/azulejo/AzulejoPanel';
 import { rectOk } from '@/game/geometry';
 import type { Level, PlacedRect, SolutionRect } from '@/game/types';
 import { BD_PAL, BG_PAL } from '@/theme/palette';
 import { BD_PAL_CB, BG_PAL_CB } from '@/theme/colorblindPatterns';
 import { ColorblindOverlay } from '@/theme/ColorblindOverlay';
+import { useThemeTokens } from '@/state/themeStore';
 import { Cell, type CellEdges, type CellState } from './Cell';
 import { useDragToPlaceRect } from './useDragToPlaceRect';
 
@@ -16,13 +16,9 @@ interface GridProps {
   placed: PlacedRect[];
   cellSize: number;
   colorblind: boolean;
-  patternIndex: number;
   onPlace: (rect: SolutionRect) => void;
   onRemoveAt: (index: number) => void;
 }
-
-const CORRECT_FILL = '#f5f0e8';
-const CORRECT_BORDER = '#1a3a70';
 
 interface CellInfo {
   rectIndex: number;
@@ -32,9 +28,10 @@ interface CellInfo {
 
 const EMPTY_EDGES: CellEdges = { top: false, bottom: false, left: false, right: false };
 
-export function Grid({ level, placed, cellSize, colorblind, patternIndex, onPlace, onRemoveAt }: GridProps) {
+export function Grid({ level, placed, cellSize, colorblind, onPlace, onRemoveAt }: GridProps) {
   const { size, clues } = level;
   const gridPx = size * cellSize;
+  const theme = useThemeTokens();
 
   const cellInfo = useMemo(() => {
     const grid: (CellInfo | null)[][] = Array.from({ length: size }, () => Array(size).fill(null));
@@ -74,7 +71,7 @@ export function Grid({ level, placed, cellSize, colorblind, patternIndex, onPlac
 
   return (
     <GestureDetector gesture={gesture}>
-      <View style={[styles.grid, { width: gridPx, height: gridPx }]}>
+      <View style={[styles.grid, { width: gridPx, height: gridPx, backgroundColor: theme.gridSep }]}>
         {Array.from({ length: size }).map((_, r) => (
           <View key={r} style={styles.row}>
             {Array.from({ length: size }).map((_, c) => {
@@ -85,12 +82,8 @@ export function Grid({ level, placed, cellSize, colorblind, patternIndex, onPlac
               let fillColor: string | undefined;
               let borderColor: string | undefined;
               if (info) {
-                if (info.correct) {
-                  fillColor = colorblind ? fillPal[info.rectIndex % fillPal.length] : CORRECT_FILL;
-                  borderColor = colorblind ? borderPal[info.rectIndex % borderPal.length] : CORRECT_BORDER;
-                } else {
-                  borderColor = borderPal[info.rectIndex % borderPal.length];
-                }
+                fillColor = fillPal[info.rectIndex % fillPal.length];
+                borderColor = borderPal[info.rectIndex % borderPal.length];
               }
 
               return (
@@ -98,6 +91,7 @@ export function Grid({ level, placed, cellSize, colorblind, patternIndex, onPlac
                   key={c}
                   size={cellSize}
                   clueValue={clue && clue.v > 1 ? clue.v : undefined}
+                  clueColor={theme.accent}
                   state={state}
                   edges={info?.edges ?? EMPTY_EDGES}
                   fillColor={fillColor}
@@ -108,31 +102,22 @@ export function Grid({ level, placed, cellSize, colorblind, patternIndex, onPlac
           </View>
         ))}
 
-        {colorblind ? (
+        {colorblind && (
           <ColorblindOverlay size={size} cellSize={cellSize} correctRects={correctRects} />
-        ) : (
-          <AzulejoPanel
-            size={size}
-            cellSize={cellSize}
-            revealedRects={correctRects.map(r => r.rect)}
-            patternIndex={patternIndex}
-          />
         )}
 
-        <Animated.View pointerEvents="none" style={[styles.preview, previewStyle]} />
+        <Animated.View pointerEvents="none" style={[styles.preview, { borderColor: theme.accent, backgroundColor: theme.accent + '30' }]} />
       </View>
     </GestureDetector>
   );
 }
 
 const styles = StyleSheet.create({
-  grid: { position: 'relative', backgroundColor: '#e0d4e8', borderRadius: 10, overflow: 'hidden' },
+  grid: { position: 'relative', borderRadius: 10, overflow: 'hidden' },
   row: { flexDirection: 'row' },
   preview: {
     position: 'absolute',
     borderWidth: 2,
-    borderColor: '#9b7bb8',
     borderStyle: 'dashed',
-    backgroundColor: 'rgba(155,123,184,0.18)',
   },
 });

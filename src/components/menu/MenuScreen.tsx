@@ -11,11 +11,11 @@ interface MenuScreenProps {
 }
 
 const THEME_SWATCH_COLORS: Record<ThemeName, string> = {
-  pastel: '#9b7bb8',
-  ocean: '#5a9fd4',
-  sunset: '#e07060',
-  forest: '#56a87a',
-  dark: '#4a4a6a',
+  roxo:       '#9b7bb8',
+  agua:       '#72cfa0',
+  azulescuro: '#1a3a6a',
+  rosa:       '#f4b8c8',
+  amarelo:    '#f5c842',
 };
 
 const HOW_TO = [
@@ -26,7 +26,7 @@ const HOW_TO = [
 
 export function MenuScreen({ dailyDone, onStartGame, onStartDaily, onStartInfinite, onStartTraining }: MenuScreenProps) {
   const theme = useThemeTokens();
-  const { themeName, colorblind, setTheme, toggleColorblind } = useThemeStore();
+  const { themeName, setTheme } = useThemeStore();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
@@ -55,17 +55,6 @@ export function MenuScreen({ dailyDone, onStartGame, onStartDaily, onStartInfini
             ]}
           />
         ))}
-        <Pressable
-          onPress={toggleColorblind}
-          style={[
-            styles.swatch,
-            styles.cbSwatch,
-            { backgroundColor: theme.surface, borderColor: colorblind ? theme.text : 'transparent' },
-            colorblind && { backgroundColor: theme.accent },
-          ]}
-        >
-          <Text style={[styles.cbSwatchText, { color: colorblind ? '#fff' : theme.text }]}>CB</Text>
-        </Pressable>
       </View>
 
       <View style={styles.menuBtns}>

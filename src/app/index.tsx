@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { AzulejoToast } from '@/azulejo/AzulejoToast';
 import { Grid } from '@/components/Grid/Grid';
 import { FooterButtons } from '@/components/hud/FooterButtons';
 import { Header } from '@/components/hud/Header';
@@ -36,13 +35,11 @@ export default function GameScreen() {
   const levelsSheetRef = useRef<LevelPickerSheetHandle>(null);
   const winSheetRef = useRef<WinSheetHandle>(null);
   const [tutorialWon, setTutorialWon] = useState(false);
-  const [toastTrigger, setToastTrigger] = useState<string | null>(null);
   const [dailyCountdown, setDailyCountdown] = useState(formatDuration(getNextDailyInMs()));
 
   const cellSize = useGridCellSize(level?.size ?? 6);
 
   // Azulejo pattern index: shared per level, cycling by campaign level idx / infinite count.
-  const patternIndex = mode === 'infinite' ? infiniteCount : Math.max(0, curLvl);
 
   // ── Level loading per mode ──────────────────────────────────────────────
   function startCampaign(idx: number) {
@@ -85,9 +82,6 @@ export default function GameScreen() {
     if (mode === 'tutorial') {
       setTutorialWon(true);
       return;
-    }
-    if (!colorblind) {
-      setToastTrigger(`${mode}-${curLvl}-${infiniteCount}-${Date.now()}`);
     }
     if (mode === 'infinite') {
       progress.setInfiniteBest(infiniteCount + 1);
@@ -187,7 +181,6 @@ export default function GameScreen() {
           placed={placed}
           cellSize={cellSize}
           colorblind={colorblind}
-          patternIndex={patternIndex}
           onPlace={placeRect}
           onRemoveAt={removeRectAt}
         />
@@ -250,7 +243,6 @@ export default function GameScreen() {
         onPlayLevel1={() => startCampaign(0)}
       />
 
-      <AzulejoToast triggerKey={toastTrigger} loreIndex={patternIndex} patternIndex={patternIndex} />
     </View>
   );
 }

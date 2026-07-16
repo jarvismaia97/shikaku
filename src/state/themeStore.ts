@@ -13,7 +13,7 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>()(
   persist(
     set => ({
-      themeName: 'pastel',
+      themeName: 'roxo',
       colorblind: false,
       setTheme: name => set({ themeName: name }),
       toggleColorblind: () => set(s => ({ colorblind: !s.colorblind })),
