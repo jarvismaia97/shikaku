@@ -1229,14 +1229,6 @@ function updateCells() {
     }
   }
 
-  // Level-wide azulejo index (same pattern for all rects in this level)
-  const lvlAzIdx = infiniteMode ? infiniteCount : Math.max(0, curLvl);
-  const levelPat = AZULEJO_PATS[lvlAzIdx % AZULEJO_PATS.length];
-
-  // Seamless panel: one large pattern tiled across the whole grid
-  const gridPx = computeGridPx();
-  const cellPx = (gridPx - (size - 1)) / size; // each cell's pixel size (excl. gaps)
-
   // Placed rects
   const pal   = colorblindMode ? BG_PAL_CB : BG_PAL;
   const bdpal = colorblindMode ? BD_PAL_CB : BD_PAL;
@@ -1250,19 +1242,10 @@ function updateCells() {
         const el = cellEls[r][c];
         if (ok) {
           el.classList.add('r-correct');
+          el.style.setProperty('--rc', bg);
+          el.style.setProperty('--rb', bd);
           if (colorblindMode) {
-            el.style.setProperty('--rc', bg);
-            el.style.setProperty('--rb', bd);
             el.style.setProperty('--rp', PATTERNS[ci % PATTERNS.length]);
-          } else {
-            // All rects in this level share the same azulejo panel
-            const xOff = -(c * (cellPx + 1));
-            const yOff = -(r * (cellPx + 1));
-            el.style.setProperty('--rc', '#f5f0e8');
-            el.style.setProperty('--rb', '#1a3a70');
-            el.style.setProperty('--rp', levelPat);
-            el.style.setProperty('--rp-pos', `${xOff}px ${yOff}px`);
-            el.style.setProperty('--rp-size', `${gridPx}px ${gridPx}px`);
           }
           if (r === r1)   el.classList.add('bt');
           if (r === r2-1) el.classList.add('bb');
