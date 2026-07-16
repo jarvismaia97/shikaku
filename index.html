@@ -78,7 +78,7 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   font-weight: 800;
   cursor: crosshair;
   position: relative;
-  color: var(--text);
+  color: var(--accent);
   transition: background 0.08s;
   border: 1px solid transparent;
 }
@@ -1449,7 +1449,6 @@ function markWin() {
   haptic([80, 40, 80]);
   if (!colorblindMode) {
     const lvlAzIdx = infiniteMode ? infiniteCount : Math.max(0, curLvl);
-    showAzulejoToast(lvlAzIdx);
   }
   if (tutActive) {
     setTimeout(tutWin, 350);
@@ -1932,16 +1931,6 @@ updateHintBtn();
 updateDailyBtn();
 </script>
 
-<!-- Azulejo info toast -->
-<div id="az-toast" class="az-toast">
-  <div class="az-tile-preview" id="az-tile-preview"></div>
-  <div class="az-body">
-    <div class="az-toast-name" id="az-toast-name"></div>
-    <div class="az-toast-loc" id="az-toast-loc"></div>
-    <div class="az-toast-meta" id="az-toast-meta"></div>
-    <div class="az-toast-fact" id="az-toast-fact"></div>
-  </div>
-</div>
 
 </body>
 </html>
