@@ -9,7 +9,6 @@ import { LevelPickerSheet, type LevelPickerSheetHandle } from '@/components/over
 import { WinSheet, type WinSheetHandle } from '@/components/overlays/WinSheet';
 import { TutorialOverlay } from '@/components/tutorial/TutorialOverlay';
 import { formatDuration, getDailyLevel, getNextDailyInMs } from '@/game/daily';
-import { rectOk } from '@/game/geometry';
 import { getInfiniteLevel } from '@/game/infinite';
 import { getLevel, LEVEL_META, TUTORIAL_LEVEL } from '@/game/levels';
 import { useGameStore } from '@/state/gameStore';
@@ -38,7 +37,6 @@ export default function GameScreen() {
   const winSheetRef = useRef<WinSheetHandle>(null);
   const [tutorialWon, setTutorialWon] = useState(false);
   const [toastTrigger, setToastTrigger] = useState<string | null>(null);
-  const levelToastShownRef = useRef(false);
   const [dailyCountdown, setDailyCountdown] = useState(formatDuration(getNextDailyInMs()));
 
   const cellSize = useGridCellSize(level?.size ?? 6);
@@ -49,53 +47,37 @@ export default function GameScreen() {
   // ── Level loading per mode ──────────────────────────────────────────────
   function startCampaign(idx: number) {
     setCurLvl(idx);
-    levelToastShownRef.current = false;
     loadLevel(getLevel(idx));
     enterGame('campaign', idx);
   }
 
   function startDaily() {
-    levelToastShownRef.current = false;
     loadLevel(getDailyLevel());
     enterGame('daily');
   }
 
   function startInfiniteRun() {
     setInfiniteCount(0);
-    levelToastShownRef.current = false;
     loadLevel(getInfiniteLevel(0));
     enterGame('infinite');
   }
 
   function loadNextInfinite(count: number) {
     setInfiniteCount(count);
-    levelToastShownRef.current = false;
     loadLevel(getInfiniteLevel(count));
   }
 
   function startTraining() {
-    levelToastShownRef.current = false;
     loadLevel(getLevel(0));
     enterGame('training', 0);
   }
 
   function startTutorial() {
-    levelToastShownRef.current = false;
     setTutorialStep(0);
     setTutorialWon(false);
     loadLevel(TUTORIAL_LEVEL);
     enterGame('tutorial');
   }
-
-  // ── Azulejo toast: first correct rect placed in the level, non-colorblind only ──
-  useEffect(() => {
-    if (!level || colorblind || levelToastShownRef.current) return;
-    const hasCorrect = placed.some(r => rectOk(r, level));
-    if (hasCorrect) {
-      levelToastShownRef.current = true;
-      setToastTrigger(`${mode}-${curLvl}-${infiniteCount}-${Date.now()}`);
-    }
-  }, [placed, level, colorblind, mode, curLvl, infiniteCount]);
 
   // ── Win handling ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -103,6 +85,9 @@ export default function GameScreen() {
     if (mode === 'tutorial') {
       setTutorialWon(true);
       return;
+    }
+    if (!colorblind) {
+      setToastTrigger(`${mode}-${curLvl}-${infiniteCount}-${Date.now()}`);
     }
     if (mode === 'infinite') {
       progress.setInfiniteBest(infiniteCount + 1);
