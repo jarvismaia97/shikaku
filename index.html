@@ -702,11 +702,11 @@ footer {
     </div>
   </div>
   <div class="theme-row" id="theme-row">
-    <button class="theme-swatch active" style="background:#9b7bb8" data-theme="pastel" onclick="setTheme('pastel',this)" title="Lavanda"></button>
-    <button class="theme-swatch" style="background:#5a9fd4" data-theme="ocean" onclick="setTheme('ocean',this)" title="Oceano"></button>
-    <button class="theme-swatch" style="background:#e07060" data-theme="sunset" onclick="setTheme('sunset',this)" title="Sunset"></button>
-    <button class="theme-swatch" style="background:#56a87a" data-theme="forest" onclick="setTheme('forest',this)" title="Floresta"></button>
-    <button class="theme-swatch" style="background:#4a4a6a" data-theme="dark" onclick="setTheme('dark',this)" title="Escuro"></button>
+    <button class="theme-swatch active" style="background:#9b7bb8" data-theme="roxo" onclick="setTheme('roxo',this)" title="Roxo"></button>
+    <button class="theme-swatch" style="background:#3ab8b0" data-theme="agua" onclick="setTheme('agua',this)" title="Verde Água"></button>
+    <button class="theme-swatch" style="background:#1a3a6a" data-theme="azulescuro" onclick="setTheme('azulescuro',this)" title="Azul Escuro"></button>
+    <button class="theme-swatch" style="background:#89c4e1" data-theme="azulbebe" onclick="setTheme('azulbebe',this)" title="Azul Bebé"></button>
+    <button class="theme-swatch" style="background:#f5c842" data-theme="amarelo" onclick="setTheme('amarelo',this)" title="Amarelo"></button>
   </div>
   <div class="menu-btns">
     <button class="menu-daily-btn" id="daily-menu-btn" onclick="startDaily()">☀️ Desafio Diário</button>
@@ -1780,25 +1780,25 @@ function goToMenu() {
 
 // ─── Themes ───────────────────────────────────────────────────────────────────
 const THEMES = {
-  pastel: {
+  roxo: {
     '--bg': '#faf4fb', '--surface': '#ffffff', '--grid-sep': '#e0d4e8',
     '--text': '#3a2d45', '--sub': '#b09abf', '--accent': '#9b7bb8',
   },
-  ocean: {
-    '--bg': '#f0f7fb', '--surface': '#ffffff', '--grid-sep': '#c0d8ea',
-    '--text': '#1a3045', '--sub': '#7aaabf', '--accent': '#3a80b8',
+  agua: {
+    '--bg': '#f0fafa', '--surface': '#ffffff', '--grid-sep': '#b0e0dc',
+    '--text': '#0d3535', '--sub': '#5aacaa', '--accent': '#3ab8b0',
   },
-  sunset: {
-    '--bg': '#fdf5f0', '--surface': '#ffffff', '--grid-sep': '#e8c8b8',
-    '--text': '#3a1a0a', '--sub': '#c09080', '--accent': '#e07060',
+  azulescuro: {
+    '--bg': '#e8edf5', '--surface': '#ffffff', '--grid-sep': '#b0bcd8',
+    '--text': '#0d1a35', '--sub': '#5870a0', '--accent': '#1a3a6a',
   },
-  forest: {
-    '--bg': '#f2faf5', '--surface': '#ffffff', '--grid-sep': '#b8ddc8',
-    '--text': '#1a3025', '--sub': '#70a888', '--accent': '#3a8860',
+  azulbebe: {
+    '--bg': '#f0f8fd', '--surface': '#ffffff', '--grid-sep': '#c0ddf0',
+    '--text': '#1a3045', '--sub': '#7ab0cc', '--accent': '#89c4e1',
   },
-  dark: {
-    '--bg': '#1e1e2e', '--surface': '#2a2a3e', '--grid-sep': '#3a3a54',
-    '--text': '#d0d0e8', '--sub': '#7070a0', '--accent': '#9070d0',
+  amarelo: {
+    '--bg': '#fffbea', '--surface': '#ffffff', '--grid-sep': '#ede09a',
+    '--text': '#3a2d00', '--sub': '#b0940a', '--accent': '#f5c842',
   },
 };
 
@@ -1920,7 +1920,7 @@ function toggleColorblind(el) {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-const savedTheme = localStorage.getItem('bumi-theme') || 'pastel';
+const savedTheme = localStorage.getItem('bumi-theme') || 'roxo';
 const savedSwatch = document.querySelector(`[data-theme="${savedTheme}"]`);
 setTheme(savedTheme, savedSwatch);
 if (colorblindMode) {
