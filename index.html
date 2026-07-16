@@ -98,7 +98,8 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
   inset: -2px;
   background: var(--rc, #f5f0e8);
   background-image: var(--rp, none);
-  background-size: 100% 100%;
+  background-size: var(--rp-size, 100% 100%);
+  background-position: var(--rp-pos, 0 0);
   z-index: -1;
 }
 /* Elevated colored border on outer edges of correct rects */
@@ -1124,6 +1125,7 @@ let hints  = 3;
 let trainingMode = false;
 let infiniteMode  = false;
 let infiniteCount = 0;
+let levelToastShown = false;
 
 function updateHintBtn() {
   const btn = document.getElementById('btn-hint');
@@ -1223,8 +1225,18 @@ function updateCells() {
       el.style.removeProperty('--rc');
       el.style.removeProperty('--rb');
       el.style.removeProperty('--rp');
+      el.style.removeProperty('--rp-pos');
+      el.style.removeProperty('--rp-size');
     }
   }
+
+  // Level-wide azulejo index (same pattern for all rects in this level)
+  const lvlAzIdx = infiniteMode ? infiniteCount : Math.max(0, curLvl);
+  const levelPat = AZULEJO_PATS[lvlAzIdx % AZULEJO_PATS.length];
+
+  // Seamless panel: one large pattern tiled across the whole grid
+  const gridPx = computeGridPx();
+  const cellPx = (gridPx - (size - 1)) / size; // each cell's pixel size (excl. gaps)
 
   // Placed rects
   const pal   = colorblindMode ? BG_PAL_CB : BG_PAL;
@@ -1244,9 +1256,14 @@ function updateCells() {
             el.style.setProperty('--rb', bd);
             el.style.setProperty('--rp', PATTERNS[ci % PATTERNS.length]);
           } else {
+            // All rects in this level share the same azulejo panel
+            const xOff = -(c * (cellPx + 1));
+            const yOff = -(r * (cellPx + 1));
             el.style.setProperty('--rc', '#f5f0e8');
             el.style.setProperty('--rb', '#1a3a70');
-            el.style.setProperty('--rp', AZULEJO_PATS[ci % AZULEJO_PATS.length]);
+            el.style.setProperty('--rp', levelPat);
+            el.style.setProperty('--rp-pos', `${xOff}px ${yOff}px`);
+            el.style.setProperty('--rp-size', `${gridPx}px ${gridPx}px`);
           }
           if (r === r1)   el.classList.add('bt');
           if (r === r2-1) el.classList.add('bb');
@@ -1463,6 +1480,7 @@ function loadLvl(idx) {
   curLvl = idx;
   lvl = getLevel(idx);
   placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
+  levelToastShown = false;
   const m = LEVEL_META[idx];
   document.getElementById('lvl-n').textContent = idx + 1;
   document.getElementById('lvl-diff').textContent = `${m.label} · ${m.size}×${m.size}`;
@@ -1833,9 +1851,9 @@ const AZULEJO_LORE = [
 ];
 
 let _azToastTimer = null;
-function showAzulejoToast(ci) {
-  const lore = AZULEJO_LORE[ci % AZULEJO_LORE.length];
-  const pat  = AZULEJO_PATS[ci % AZULEJO_PATS.length];
+function showAzulejoToast(lvlIdx) {
+  const lore = AZULEJO_LORE[lvlIdx % AZULEJO_LORE.length];
+  const pat  = AZULEJO_PATS[lvlIdx % AZULEJO_PATS.length];
   const toast = document.getElementById('az-toast');
   const preview = document.getElementById('az-tile-preview');
   document.getElementById('az-toast-name').textContent = lore.name;
@@ -1861,7 +1879,11 @@ function animateCorrectRect(rect) {
       el.addEventListener('animationend', () => el.classList.remove('r-pop'), { once: true });
     }
   }
-  if (!colorblindMode) showAzulejoToast(ci);
+  if (!colorblindMode && !levelToastShown) {
+    levelToastShown = true;
+    const lvlAzIdx = infiniteMode ? infiniteCount : Math.max(0, curLvl);
+    showAzulejoToast(lvlAzIdx);
+  }
 }
 
 // ─── Infinite mode ────────────────────────────────────────────────────────────
@@ -1871,6 +1893,7 @@ function loadInfinite() {
   const size = sizes[infiniteCount % sizes.length];
   lvl = genLevel(seed, size, 14, 2);
   placed = []; drawing = null; colorN = 0; pid = null; onRect = -1;
+  levelToastShown = false;
   document.getElementById('lvl-n').textContent = '∞';
   document.getElementById('lvl-diff').textContent = `Infinito · #${infiniteCount + 1} · ${size}×${size}`;
   document.getElementById('btn-next').classList.remove('show');
