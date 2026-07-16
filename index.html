@@ -91,41 +91,33 @@ h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
 .cell.r-placed.bl { border-left:   2px dashed rgba(120,100,160,0.35) !important; }
 .cell.r-placed.br { border-right:  2px dashed rgba(120,100,160,0.35) !important; }
 
-/* Correto: fill sólido com volume 3D */
+/* Correto: fill sólido, box-shadow para cobrir gaps da grelha */
 .cell.r-correct {
   background: var(--rc, #c4a8d8);
-  isolation: isolate;
+  /* spread de 2px cobre o gap de 1px em todos os lados */
+  box-shadow: 0 0 0 2px var(--rc, #c4a8d8);
   z-index: 1;
 }
-/* Bleed para cobrir as linhas da grelha + gradiente de volume */
-.cell.r-correct::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: var(--rc, #c4a8d8);
-  background-image: linear-gradient(160deg, rgba(255,255,255,0.30) 0%, transparent 55%);
-  z-index: -1;
-}
-/* Bordas exteriores mais grossas */
+/* Bordas exteriores */
 .cell.r-correct.bt { border-top:    5px solid var(--rb, #7850a8) !important; }
 .cell.r-correct.bb { border-bottom: 5px solid var(--rb, #7850a8) !important; }
 .cell.r-correct.bl { border-left:   5px solid var(--rb, #7850a8) !important; }
 .cell.r-correct.br { border-right:  5px solid var(--rb, #7850a8) !important; }
-/* Sombra com volume real — canto top-left recebe highlight interno */
+/* Elevação nos cantos */
 .cell.r-correct.bt.bl {
-  box-shadow: -5px -5px 18px rgba(0,0,0,.22), inset 3px 3px 6px rgba(255,255,255,0.4);
+  box-shadow: 0 0 0 2px var(--rc,#c4a8d8), -5px -5px 18px rgba(0,0,0,.22), inset 3px 3px 6px rgba(255,255,255,0.4);
   z-index: 2;
 }
 .cell.r-correct.bt.br {
-  box-shadow:  5px -5px 18px rgba(0,0,0,.22), inset -3px 3px 6px rgba(255,255,255,0.4);
+  box-shadow: 0 0 0 2px var(--rc,#c4a8d8),  5px -5px 18px rgba(0,0,0,.22), inset -3px 3px 6px rgba(255,255,255,0.4);
   z-index: 2;
 }
 .cell.r-correct.bb.bl {
-  box-shadow: -5px  5px 18px rgba(0,0,0,.22), inset 3px -3px 6px rgba(255,255,255,0.4);
+  box-shadow: 0 0 0 2px var(--rc,#c4a8d8), -5px  5px 18px rgba(0,0,0,.22), inset 3px -3px 6px rgba(255,255,255,0.4);
   z-index: 2;
 }
 .cell.r-correct.bb.br {
-  box-shadow:  5px  5px 18px rgba(0,0,0,.22), inset -3px -3px 6px rgba(255,255,255,0.4);
+  box-shadow: 0 0 0 2px var(--rc,#c4a8d8),  5px  5px 18px rgba(0,0,0,.22), inset -3px -3px 6px rgba(255,255,255,0.4);
   z-index: 2;
 }
 
