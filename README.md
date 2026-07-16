@@ -2,13 +2,5 @@
 
 A Shikaku puzzle game (Portuguese, azulejo-themed) — divide the grid into rectangles matching the numbered clues.
 
-Being rewritten from a single-file HTML prototype (`index.html`, kept for reference during the port) into an Expo Router app targeting iOS, Android, and web, with Supabase for anonymous-first auth and progress sync, and a solver-verified level generator.
-
-### Setup
-
-```bash
-npm install
-npm run web      # or: npm run ios / npm run android
-npm test         # unit tests for src/game/*
-```
+This repo holds the original single-file HTML prototype (`index.html`), kept as a static reference/fallback. The active Expo Router rewrite (iOS/Android/web) lives at [jarvismaia97/bumi](https://github.com/jarvismaia97/bumi).
 
